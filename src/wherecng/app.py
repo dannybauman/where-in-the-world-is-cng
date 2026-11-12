@@ -9,6 +9,7 @@ from pathlib import Path
 
 from fastapi import FastAPI
 from fastapi.responses import FileResponse
+from fastapi.staticfiles import StaticFiles
 from groundstation import tools
 
 STATIC = Path(__file__).parent / "static"
@@ -84,6 +85,10 @@ def api_tiles(item: str, expression: str | None = None, colormap: str = "rdylgn"
     if expression:
         return {"tiles": tools.tile_url_template("earth-search", "sentinel-2-l2a", item, expression=expression, colormap_name=colormap)}
     return {"tiles": tools.tile_url_template("earth-search", "sentinel-2-l2a", item, ["visual"])}
+
+
+# last, so the /api routes above are matched first
+app.mount("/static", StaticFiles(directory=STATIC), name="static")
 
 
 def main():
