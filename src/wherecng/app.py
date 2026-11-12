@@ -8,7 +8,7 @@ from functools import wraps
 from pathlib import Path
 
 from fastapi import FastAPI
-from fastapi.responses import FileResponse
+from fastapi.responses import FileResponse, JSONResponse
 from fastapi.staticfiles import StaticFiles
 from groundstation import tools
 
@@ -29,7 +29,10 @@ def cached(ttl):
             hit = _cache.get(key)
             if hit and time.time() - hit[0] < ttl:
                 return hit[1]
-            r = fn(**kw)
+            try:
+                r = fn(**kw)
+            except Exception as e:  # a free service timing out is normal; say so plainly, keep nothing, never retry
+                return JSONResponse({"error": f"{type(e).__name__}: the service didn't answer"}, status_code=502)
             if not (isinstance(r, dict) and r.get("error")):
                 _cache[key] = (time.time(), r)
             return r
