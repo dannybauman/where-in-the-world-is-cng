@@ -37,7 +37,6 @@
 
   @media (min-width: 900px) {
     .maplibregl-ctrl-top-right { display: block; }
-    .brand button { font-size: var(--step-0); }
     .app { grid-template-columns: 1fr var(--width-aside); grid-template-rows: 1fr; }
     main { border-left: var(--border-thin) solid var(--color-line); }
     .panel { padding: var(--space-6) var(--space-5); }
@@ -49,6 +48,7 @@
   /* map overlays */
   .brand { position: absolute; left: var(--space-3); top: var(--space-3); z-index: var(--z-overlay); display: flex; gap: var(--space-2); }
   .brand button { white-space: nowrap; font-size: var(--step--1); border: 0; background: var(--color-sheet); border-radius: var(--radius-pill); padding: var(--space-2) var(--space-4); min-height: var(--size-touch); box-shadow: var(--shadow-1); cursor: pointer; font-weight: var(--weight-medium); }
+  @media (min-width: 900px) { .brand button { font-size: var(--step-0); } }
   .brand .logo { font-family: var(--font-display); font-weight: var(--weight-display); }
   .flip { position: absolute; left: 50%; bottom: var(--size-flip-bottom); transform: translateX(-50%); z-index: var(--z-overlay); display: none; background: var(--color-sheet); border-radius: var(--radius-pill); padding: var(--space-1); box-shadow: var(--shadow-2); }
   .flip.on { display: flex; }
@@ -114,7 +114,7 @@
   .note p { margin: 0; font-size: var(--step--1); }
 
   /* finish */
-  .end .who { font-weight: var(--weight-bold); }
+  .end .who { font-size: var(--step-0); font-weight: var(--weight-bold); }
   .end h2 { font-size: var(--step-4); margin-bottom: var(--space-2); }
   .end .stars { font-size: var(--step-3); display: block; margin: var(--space-3) 0 var(--space-4); }
   .file { white-space: pre-wrap; font-size: var(--step--1); background: var(--color-paper); border-radius: var(--radius-sm); padding: var(--space-4); }
