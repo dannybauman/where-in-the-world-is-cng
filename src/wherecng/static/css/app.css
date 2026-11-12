@@ -113,7 +113,7 @@
   @media (min-width: 900px) { .photo { max-height: var(--height-photo-max); } }
   .photo:not(.loaded)::after { content: "Loading the picture…"; position: absolute; inset: 0; display: grid; place-items: center; color: var(--color-ink-soft); font-size: var(--step--1); animation: pulse var(--motion-pulse) ease-in-out infinite; }
   .photo.failed::after { content: "The picture didn't load. Go back and try again."; animation: none; }
-  .photo img { display: block; width: 100%; height: 100%; object-fit: cover; opacity: 0; transition: opacity var(--motion-slow); }
+  .photo img { display: block; width: 100%; height: 100%; object-fit: contain; opacity: 0; transition: opacity var(--motion-slow); }
   .photo.loaded img { opacity: 1; }
   .photo.small { max-height: none; width: var(--width-thumb); float: right; margin: 0 0 var(--space-3) var(--space-4); box-shadow: var(--shadow-1); border-radius: var(--radius-sm); }
   .clues { margin: var(--space-4) 0 0; padding: 0; list-style: none; counter-reset: clue; }
@@ -132,8 +132,8 @@
   .cloud-svg path:first-child { fill: var(--color-sheet); }
   .cloud-svg .eye { fill: var(--color-ink); }
   .cloud-svg .grin { fill: none; stroke: var(--color-ink); stroke-linecap: round; }
-  .cloud.gone { transform: translateX(120%); opacity: 0; }
-  @keyframes drift { from { transform: translateX(-25%) rotate(-3deg); } to { transform: translateX(25%) rotate(3deg); } }
+  .cloud.gone { transform: translateX(var(--cloud-exit)); opacity: 0; }
+  @keyframes drift { from { transform: translateX(calc(-1 * var(--drift-x))) rotate(calc(-1 * var(--drift-tilt))); } to { transform: translateX(var(--drift-x)) rotate(var(--drift-tilt)); } }
   .cloudsay { margin: var(--space-3) 0 0; color: var(--color-ink-soft); }
 
   .rank-line { margin-top: var(--space-4); padding: var(--space-3) var(--space-4); border-radius: var(--radius-sm); background: var(--color-paper); }
@@ -141,7 +141,7 @@
   .rank-line span { font-size: var(--step--1); color: var(--color-ink-soft); }
   .rank-line.up { background: var(--color-life); color: var(--color-on-life); animation: pop var(--motion-slow) var(--ease-out); }
   .rank-line.up span { color: var(--color-on-life); }
-  @keyframes pop { from { transform: scale(.9); opacity: 0; } }
+  @keyframes pop { from { transform: scale(var(--pop-from)); opacity: 0; } }
   @media (prefers-reduced-motion: reduce) { .cloud-svg, .clues li, .rank-line.up, .photo:not(.loaded)::after { animation: none; } }
   .sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
   .who { color: var(--color-water); font-weight: var(--weight-medium); font-size: var(--step--1); }
@@ -166,7 +166,7 @@
   .say.wrong { background: var(--color-life-wash); }
   .wait { color: var(--color-ink-soft); margin-top: var(--space-4); }
   .wait::before { content: ""; display: inline-block; width: var(--size-pulse); height: var(--size-pulse); margin-right: var(--space-2); border-radius: 50%; background: var(--color-water); animation: pulse var(--motion-pulse) ease-in-out infinite; }
-  @keyframes pulse { 50% { opacity: var(--opacity-pulse-low); transform: scale(.6); } }
+  @keyframes pulse { 50% { opacity: var(--opacity-pulse-low); transform: scale(var(--pulse-to)); } }
   @media (prefers-reduced-motion: reduce) { .wait::before { animation: none; } }
   .tapnote { margin-top: var(--space-4); font-weight: var(--weight-medium); color: var(--color-water); }
 

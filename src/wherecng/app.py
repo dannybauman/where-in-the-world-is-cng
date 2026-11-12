@@ -3,11 +3,12 @@
     uv run wherecng   # then open http://127.0.0.1:8790
 """
 
+import re
 import time
 from functools import wraps
 from pathlib import Path
 
-from fastapi import FastAPI
+from fastapi import FastAPI, HTTPException
 from fastapi.responses import FileResponse, JSONResponse
 from fastapi.staticfiles import StaticFiles
 from groundstation import tools
@@ -90,9 +91,20 @@ def api_tiles(item: str, expression: str | None = None, colormap: str = "rdylgn"
     return {"tiles": tools.tile_url_template("earth-search", "sentinel-2-l2a", item, ["visual"])}
 
 
+# the only scenes the game ever asks to preview, read once from the places list
+S2_ID = r"S2[ABC]_\w+_\d{8}_\d+_L2A"
+SCENES = set(re.findall(S2_ID, (STATIC / "js/places.js").read_text()))
+
+
 @app.get("/api/preview")
-@cached(DAY)
 def api_preview(item: str, w: float, s: float, e: float, n: float):
+    if not re.fullmatch(S2_ID, item) or item not in SCENES:
+        raise HTTPException(400, "unknown scene")
+    return _preview(item=item, w=w, s=s, e=e, n=n)
+
+
+@cached(DAY)
+def _preview(item: str, w: float, s: float, e: float, n: float):
     """One picture of a box, for the mystery round. JPEG is about a tenth the size of the PNG"""
     r = tools.preview_item("earth-search", "sentinel-2-l2a", item, assets=["visual"], bbox=[w, s, e, n], max_size=640)
     return {"url": r["preview_url"].replace(".png?", ".jpg?", 1)}

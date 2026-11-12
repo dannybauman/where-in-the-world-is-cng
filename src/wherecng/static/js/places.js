@@ -39,8 +39,8 @@ export const PLACES = [
     fact: "The Colorado River cut this canyon about 1.8 km deep." },
 ];
 
-// everyone gets the same place on the same day
-export const todayIndex = (d = new Date()) => Math.floor(Date.UTC(d.getFullYear(), d.getMonth(), d.getDate()) / 864e5) % PLACES.length;
+// everyone gets the same place on the same UTC day, matching iso() in api.js
+export const todayIndex = (d = new Date()) => Math.floor(d.getTime() / 864e5) % PLACES.length;
 export const center = b => [(b[0] + b[2]) / 2, (b[1] + b[3]) / 2];
 
 // great-circle distance in km

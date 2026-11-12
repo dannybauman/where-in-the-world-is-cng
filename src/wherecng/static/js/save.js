@@ -3,9 +3,9 @@ const KEY = "gt2";
 function load() {
   const raw = localStorage.getItem(KEY);
   let s = {};
-  try { s = JSON.parse(raw || "{}") || {}; }
-  // a save that can't be read is kept aside, never thrown away
-  catch { localStorage.setItem(KEY + "-unreadable", raw); }
+  // a save that can't be read, or isn't an object, is kept aside, never thrown away
+  try { s = JSON.parse(raw || "{}"); if (!s || typeof s !== "object" || Array.isArray(s)) throw 0; }
+  catch { s = {}; localStorage.setItem(KEY + "-unreadable", raw); }
   if (!Array.isArray(s.notes)) s.notes = [];
   if (!s.stars || typeof s.stars !== "object") s.stars = {};
   if (!s.mystery || typeof s.mystery !== "object") s.mystery = {};

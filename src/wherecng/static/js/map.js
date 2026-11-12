@@ -37,7 +37,7 @@ export async function picture(slot, url) {
   await settled();
 }
 // resolves once the map has drawn every tile it asked for, so "ready" means the picture is on screen
-const settled = () => new Promise(r => { const t = setTimeout(r, 20000); map.once("idle", () => { clearTimeout(t); r(); }); });
+const settled = () => new Promise(r => { const t = setTimeout(r, parseFloat(css("--motion-settle"))); map.once("idle", () => { clearTimeout(t); r(); }); });
 
 // the mystery round: a dotted flight from the guess to the answer along the great circle
 const flightLen = () => parseFloat(css("--motion-flight"));
@@ -55,8 +55,9 @@ function arc([x1, y1], [x2, y2], steps = 96) {
   }
   return pts;
 }
-let answer = null;
+let answer = null, round = 0; // resetMap ends the round; a flight that outlives it must not draw
 export async function flight(from, to) {
+  const mine = round;
   await ready;
   const pts = arc(from, to), line = c => ({ type: "Feature", geometry: { type: "LineString", coordinates: c } });
   if (!map.getSource("flight")) {
@@ -77,6 +78,7 @@ export async function flight(from, to) {
     };
     requestAnimationFrame(step);
   });
+  if (mine !== round) return;
   answer?.remove();
   answer = new maplibregl.Marker({ color: css("--color-life") }).setLngLat(to).addTo(map);
 }
@@ -114,7 +116,8 @@ export function mark(lngLat) {
 
 export function resetMap() {
   dropPicture("pic-a"); dropPicture("pic-b");
-  disarm();
+  disarm(); round++;
+  map.getCanvas().onkeydown = null;
   marker?.remove(); marker = null;
   answer?.remove(); answer = null;
   caseBox = null;

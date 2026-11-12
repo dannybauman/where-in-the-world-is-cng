@@ -73,6 +73,12 @@
   --motion-pulse: 1s;
   --motion-flight: 1800ms; /* the dotted line from guess to answer, read by map.js */
   --motion-drift: 7s;
+  --motion-settle: 20000ms; /* longest wait for map tiles, read by map.js; stays on under reduced motion */
+  --drift-x: 25%;
+  --drift-tilt: 3deg;
+  --cloud-exit: 120%;
+  --pop-from: .9;
+  --pulse-to: .6;
   --ease-out: cubic-bezier(.2, .8, .2, 1);
 
   --leading-tight: 1.15;
