@@ -1,0 +1,24 @@
+[project]
+name = "where-in-the-world-is-cng"
+version = "0.1.0"
+description = "Where in the world is Cloud-Native Geospatial? A browser game for learning satellite data and open tools, built on Groundstation"
+requires-python = ">=3.12,<3.15"
+license = "MIT"
+dependencies = [
+    "groundstation @ git+https://github.com/dannybauman/groundstation@1e82258697cf930765cfb8f1a8b800d1c898b871",
+    "fastapi>=0.115",
+    "uvicorn>=0.30",
+]
+
+[project.scripts]
+wherecng = "wherecng.app:main"
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.hatch.metadata]
+allow-direct-references = true
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/wherecng"]
