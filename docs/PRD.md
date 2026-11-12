@@ -54,7 +54,11 @@ Use-case themes behind this, ranked (from Danny's DevSeed notes, 2026-11-12): fo
 - Its own public repo, `dannybauman/where-in-the-world-is-cng` (MIT), installing Groundstation as a library pinned to a commit, so the game calls Groundstation's tools rather than copying them. Groundstation itself is not changed for the game. A Groundstation update reaches the game when the pin is moved on purpose and the game is tried.
 - No cloud AI model is used while playing, so hosting it needs no AI key; an "ask a question" case would change that, and waits.
 - `src/wherecng/app.py`: a small FastAPI app, thin routes over `groundstation.tools` (geocode, events, weather, search, stats, tiles).
-- `src/wherecng/static/index.html`: the whole game, vanilla JS and MapLibre with OpenFreeMap, no build step. Progress in localStorage (`gt2`).
+- `src/wherecng/static/index.html`: the page shell only. Vanilla JS (native ES modules) and MapLibre with OpenFreeMap, no build step. Progress in localStorage (`gt2`).
+- `static/css/tokens.css` holds every design value (colors, fonts, type, space, radii, shadows, motion) as custom properties named by role. `static/css/app.css` reads only those, in layers (`reset, base, layout, components, utilities`), phone layout first and the wide one at 900px.
+- `static/js/`: small modules (api, map, engine, notes, save, home, main). One file per case in `js/cases/`; a new case is one new file plus one line in `js/cases/index.js`.
+- `src/wherecng/app.py` serves `static/` at `/static`.
+- Smoke test, no network: `uv run python tests/test_smoke.py` (page loads, every file is served, imports resolve, JS parses).
 - Outside text (place names, alert titles, scene ids) is escaped where it enters the game.
 - New dependencies only when a few lines cannot do it.
 
