@@ -266,7 +266,9 @@ function render() {
     const inp = el(`<input type="text" aria-label="${s.ask.label}" placeholder="${s.ask.placeholder}">`);
     const b = el(`<button class="btn" type="button">${s.ask.button}</button>`);
     const go = () => inp.value.trim() ? doing(b, () => s.ask.run(inp.value.trim(), ctx), s.ask.wait) : inp.focus();
-    b.onclick = go; inp.onkeydown = e => e.key === "Enter" && go();
+    // an on* handler that returns false cancels the event, so `e.key === "Enter" && go()`
+    // returned false for every other key and threw away each letter typed
+    b.onclick = go; inp.onkeydown = e => { if (e.key === "Enter") go(); };
     ctl.replaceChildren(inp, b); inp.focus({ preventScroll: true });
   } else if (s.pick || s.guess) {
     const p = s.pick || s.guess;
@@ -336,7 +338,11 @@ function render() {
 }
 function star() { run.ctx.stars = (run.ctx.stars || 0) + 1; }
 const starRow = (got, of) => `<span class="stars" aria-label="${got} of ${of} stars">${"★".repeat(got)}<span class="off">${"★".repeat(of - got)}</span></span>`;
-function start(c) { resetMap(); run = { c, i: 0, ctx: { stars: 0 } }; render(); document.getElementById("panel").focus({ preventScroll: true }); }
+function start(c) {
+  resetMap(); run = { c, i: 0, ctx: { stars: 0 } }; render();
+  const panel = document.getElementById("panel");
+  if (!panel.contains(document.activeElement) || document.activeElement === panel) panel.focus({ preventScroll: true });
+}
 function finish() {
   const { c, ctx } = run, got = ctx.stars;
   save.stars[c.id] = Math.max(save.stars[c.id] || 0, got); persist();
