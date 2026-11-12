@@ -30,6 +30,7 @@ People new to all of this: no GIS, no code, no remote sensing. If a step needs a
    - when a service says to slow down, we stop and come back later, never retry in a loop.
 
 10. **Show what cloud-native makes possible.** Fun is the hook; the purpose is to show what cloud-native geospatial (CNG) made possible, cheap or fast that was not before. Each case and the mystery round carry one "Then and now" beat: a short re-creation of the old way beside the real new way.
+    "CNG" here means the whole ecosystem, not only the file formats (Danny, 2026-11-12: "when i say CNG sometimes i mean the ecosystem of DevSeed things too, like embeddings/geoai/etc"): open formats (COG, Zarr, GeoParquet), STAC catalogs, dynamic tiling (TiTiler, eoAPI), Earth embeddings and GeoAI, and the open tools Development Seed and others build on them. Beats may show any of these, credited to the open project behind them.
 
 ## The feel
 
