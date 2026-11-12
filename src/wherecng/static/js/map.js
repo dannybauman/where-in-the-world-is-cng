@@ -21,7 +21,7 @@ export async function frame(b) {
   const ring = [[b[0], b[1]], [b[2], b[1]], [b[2], b[3]], [b[0], b[3]], [b[0], b[1]]];
   const gj = { type: "Feature", geometry: { type: "Polygon", coordinates: [ring] } };
   if (map.getSource("box")) map.getSource("box").setData(gj);
-  else { map.addSource("box", { type: "geojson", data: gj }); map.addLayer({ id: "box", type: "line", source: "box", paint: { "line-color": css("--color-life"), "line-width": parseFloat(css("--border-accent")) } }); }
+  else { map.addSource("box", { type: "geojson", data: gj }); map.addLayer({ id: "box", type: "line", source: "box", paint: { "line-color": css("--color-brand"), "line-width": parseFloat(css("--border-accent")) } }); }
   map.fitBounds([[b[0], b[1]], [b[2], b[3]]], { padding: pad(), duration: fade() * 4 });
 }
 
@@ -80,7 +80,7 @@ export async function flight(from, to) {
   });
   if (mine !== round) return;
   answer?.remove();
-  answer = new maplibregl.Marker({ color: css("--color-life") }).setLngLat(to).addTo(map);
+  answer = new maplibregl.Marker({ color: css("--color-brand") }).setLngLat(to).addTo(map);
 }
 
 // the before/after switch

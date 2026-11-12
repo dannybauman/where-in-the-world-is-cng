@@ -1,24 +1,35 @@
 /* Every design value lives here, named by role. Nothing else may hold a raw color, font, size or duration.
    Breakpoint (custom properties cannot be used in media queries): wide layout at min-width 900px */
 :root {
-  /* palette from false-color satellite imagery: infrared magenta for life, water teal, survey ink */
-  --color-ink: #142a33;
-  --color-ink-soft: #4d6470;
-  --color-paper: #f2f5f3;
+  /* Development Seed branding (checked on developmentseed.org 2026-11-12). Contrast, WCAG 2 ratios, text pair first:
+     ink on sheet 10.35, ink on paper 9.44, ink on accent-wash 9.44, ink on brand-wash 8.73, ink on good-wash 9.08, ink on burn-wash 8.59,
+     ink-soft on sheet 5.74, ink-soft on paper 5.24,
+     on-brand (white) on brand 4.81, brand on sheet 4.81 (brand is not used as small text on paper: 4.39),
+     brand-text on sheet 5.86, brand-text on paper 5.34, brand-text on brand-wash 4.94,
+     accent-ink on sheet 6.35, accent-ink on paper 5.78, accent-ink on accent-wash 5.79,
+     accent on ink 5.80 (accent on sheet is only 1.79, so it is a fill, a border or text on ink, never text on white),
+     paper on ink 9.44, line on ink 7.44, good on sheet 6.00, good on good-wash 5.27, burn on sheet 7.26, burn on burn-wash 6.03 */
+  --color-ink: #443f3f;
+  --color-ink-soft: #6b6560;
+  --color-paper: #f7f4ef;
   --color-sheet: #ffffff;
-  --color-line: #d3ddd9;
-  --color-life: #b8285e;
-  --color-on-life: #ffffff;
-  --color-life-wash: #fbe9f0;
-  --color-water: #1f7a8c;
-  --color-water-wash: #eef5f6;
-  --color-good: #2e7d4f;
+  --color-line: #dedad4;
+  --color-brand: #cf3f02;
+  --color-on-brand: #ffffff;
+  --color-brand-text: #b83700;
+  --color-brand-wash: #fbe8df;
+  --color-accent: #46d6cd;
+  --color-accent-ink: #0b6b66;
+  --color-accent-wash: #e7f8f6;
+  --color-good: #26704a;
   --color-good-wash: #e7f3ec;
-  --color-map: #cfdcd8;
-  --color-scrim: rgb(20 42 51 / .5);
+  --color-burn: #a4262c;
+  --color-burn-wash: #f8e6e4;
+  --color-map: #e6e2db;
+  --color-scrim: rgb(68 63 63 / .5);
 
-  --font-display: "Bricolage Grotesque", system-ui, sans-serif;
-  --font-body: "Lexend", system-ui, sans-serif;
+  --font-display: "Roboto Condensed", system-ui, sans-serif;
+  --font-body: "Roboto", system-ui, sans-serif;
 
   --step--2: .6875rem;
   --step--1: .875rem;
@@ -35,12 +46,10 @@
   --space-5: 1.5rem;
   --space-6: 2rem;
 
-  --radius-sm: 8px;
-  --radius-lg: 18px;
+  --radius: 4px;
   --radius-pill: 999px;
 
-  --shadow-1: 0 1px 4px rgb(20 42 51 / .2);
-  --shadow-2: 0 2px 10px rgb(20 42 51 / .25);
+  --shadow-cloud: 0 2px 8px rgb(68 63 63 / .35); /* the one shadow: lifts the white cloud off the picture */
 
   --size-touch: 44px;
   --size-control: 48px;
@@ -84,12 +93,12 @@
   --leading-tight: 1.15;
   --leading-snug: 1.4;
   --leading-body: 1.55;
-  --tracking-display: -.01em;
+  --tracking-display: 0;
   --tracking-stars: .1em;
   --weight-body: 400;
-  --weight-medium: 600;
+  --weight-medium: 500;
   --weight-bold: 700;
-  --weight-display: 800;
+  --weight-display: 700;
 
   --border-thin: 1px;
   --border-control: 2px;
