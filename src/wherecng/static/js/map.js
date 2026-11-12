@@ -4,6 +4,8 @@ const css = name => getComputedStyle(document.documentElement).getPropertyValue(
 export const fade = () => parseFloat(css("--motion-slow"));
 
 export const map = new maplibregl.Map({ container: "map", style: "https://tiles.openfreemap.org/styles/positron", center: [-40, 30], zoom: 1.3, attributionControl: { compact: true } });
+// the compact credits open on load and cover the bottom of a phone map; the (i) button still opens them
+map.on("load", () => document.querySelector(".maplibregl-ctrl-attrib")?.classList.remove("maplibregl-compact-show"));
 map.addControl(new maplibregl.NavigationControl({ showCompass: false }), "top-right");
 const ready = new Promise(r => map.on("load", r));
 export const flyHome = () => map.flyTo({ center: [-40, 30], zoom: 1.3, duration: fade() * 3 });
@@ -17,7 +19,7 @@ export async function frame(b) {
   const ring = [[b[0], b[1]], [b[2], b[1]], [b[2], b[3]], [b[0], b[3]], [b[0], b[1]]];
   const gj = { type: "Feature", geometry: { type: "Polygon", coordinates: [ring] } };
   if (map.getSource("box")) map.getSource("box").setData(gj);
-  else { map.addSource("box", { type: "geojson", data: gj }); map.addLayer({ id: "box", type: "line", source: "box", paint: { "line-color": css("--color-life"), "line-width": 3 } }); }
+  else { map.addSource("box", { type: "geojson", data: gj }); map.addLayer({ id: "box", type: "line", source: "box", paint: { "line-color": css("--color-life"), "line-width": parseFloat(css("--border-accent")) } }); }
   map.fitBounds([[b[0], b[1]], [b[2], b[3]]], { padding: 32, duration: fade() * 4 });
 }
 
@@ -50,12 +52,12 @@ $("flip-b").onclick = () => show("b");
 // one tap on the map, then the handler is gone; arm again to try again
 export function armTap(fn) {
   tapHandler = e => { disarm(); fn(e); };
-  map.getCanvas().style.cursor = "crosshair";
+  map.getCanvas().classList.add("is-picking");
   map.on("click", tapHandler);
 }
 function disarm() {
   if (tapHandler) { map.off("click", tapHandler); tapHandler = null; }
-  map.getCanvas().style.cursor = "";
+  map.getCanvas().classList.remove("is-picking");
 }
 export function mark(lngLat) {
   marker?.remove();

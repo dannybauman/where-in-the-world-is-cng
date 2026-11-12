@@ -25,15 +25,15 @@
   --step-0: 1.0625rem;
   --step-1: 1.25rem;
   --step-2: 1.5rem;
-  --step-3: 2rem;
-  --step-4: 2.25rem;
+  --step-3: clamp(1.625rem, 1.35rem + 1.2vw, 2rem);
+  --step-4: clamp(1.75rem, 1.4rem + 1.6vw, 2.25rem);
 
-  --space-1: 4px;
-  --space-2: 8px;
-  --space-3: 12px;
-  --space-4: 16px;
-  --space-5: 24px;
-  --space-6: 32px;
+  --space-1: .25rem;
+  --space-2: .5rem;
+  --space-3: .75rem;
+  --space-4: 1rem;
+  --space-5: 1.5rem;
+  --space-6: 2rem;
 
   --radius-sm: 8px;
   --radius-lg: 18px;
@@ -56,9 +56,34 @@
   --width-bar-value: 3.5rem;
   --width-input-min: 12rem;
   --height-map-phone: 45vh;
+  --height-map-phone: 45dvh; /* dvh follows the phone browser's moving address bar; vh above is the fallback */
   --height-sheet-max: 80vh;
+  --height-sheet-max: 80dvh;
 
   --motion-slow: 400ms;
   --motion-pulse: 1s;
+
+  --leading-tight: 1.15;
+  --leading-snug: 1.4;
+  --leading-body: 1.55;
+  --tracking-display: -.01em;
+  --tracking-stars: .1em;
+  --weight-body: 400;
+  --weight-medium: 600;
+  --weight-bold: 700;
+  --weight-display: 800;
+
+  --border-thin: 1px;
+  --border-control: 2px;
+  --border-accent: 4px;
+  --focus-ring: 3px;
+  --focus-offset: 2px;
+
+  --opacity-busy: .75;
+  --opacity-locked: .6;
+  --opacity-pulse-low: .25;
+
+  --z-overlay: 2;
+  --z-skip: 10;
 }
 @media (prefers-reduced-motion: reduce) { :root { --motion-slow: 0ms; } }
