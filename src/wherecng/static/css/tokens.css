@@ -1,0 +1,64 @@
+/* Every design value lives here, named by role. Nothing else may hold a raw color, font, size or duration.
+   Breakpoint (custom properties cannot be used in media queries): wide layout at min-width 900px */
+:root {
+  /* palette from false-color satellite imagery: infrared magenta for life, water teal, survey ink */
+  --color-ink: #142a33;
+  --color-ink-soft: #4d6470;
+  --color-paper: #f2f5f3;
+  --color-sheet: #ffffff;
+  --color-line: #d3ddd9;
+  --color-life: #b8285e;
+  --color-on-life: #ffffff;
+  --color-life-wash: #fbe9f0;
+  --color-water: #1f7a8c;
+  --color-water-wash: #eef5f6;
+  --color-good: #2e7d4f;
+  --color-good-wash: #e7f3ec;
+  --color-map: #cfdcd8;
+  --color-scrim: rgb(20 42 51 / .5);
+
+  --font-display: "Bricolage Grotesque", system-ui, sans-serif;
+  --font-body: "Lexend", system-ui, sans-serif;
+
+  --step--2: .6875rem;
+  --step--1: .875rem;
+  --step-0: 1.0625rem;
+  --step-1: 1.25rem;
+  --step-2: 1.5rem;
+  --step-3: 2rem;
+  --step-4: 2.25rem;
+
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-5: 24px;
+  --space-6: 32px;
+
+  --radius-sm: 8px;
+  --radius-lg: 18px;
+  --radius-pill: 999px;
+
+  --shadow-1: 0 1px 4px rgb(20 42 51 / .2);
+  --shadow-2: 0 2px 10px rgb(20 42 51 / .25);
+
+  --size-touch: 44px;
+  --size-control: 48px;
+  --size-option: 52px;
+  --size-track: 14px;
+  --size-dot: 6px;
+  --size-pulse: 12px;
+  --size-flip-bottom: 40px;
+  --width-panel: 34rem;
+  --width-aside: 30rem;
+  --width-dialog: 36rem;
+  --width-bar-label: 7.5rem;
+  --width-bar-value: 3.5rem;
+  --width-input-min: 12rem;
+  --height-map-phone: 45vh;
+  --height-sheet-max: 80vh;
+
+  --motion-slow: 400ms;
+  --motion-pulse: 1s;
+}
+@media (prefers-reduced-motion: reduce) { :root { --motion-slow: 0ms; } }
