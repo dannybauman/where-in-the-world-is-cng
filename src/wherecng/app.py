@@ -87,6 +87,14 @@ def api_tiles(item: str, expression: str | None = None, colormap: str = "rdylgn"
     return {"tiles": tools.tile_url_template("earth-search", "sentinel-2-l2a", item, ["visual"])}
 
 
+@app.get("/api/preview")
+@cached(DAY)
+def api_preview(item: str, w: float, s: float, e: float, n: float):
+    """One picture of a box, for the mystery round. JPEG is about a tenth the size of the PNG"""
+    r = tools.preview_item("earth-search", "sentinel-2-l2a", item, assets=["visual"], bbox=[w, s, e, n], max_size=640)
+    return {"url": r["preview_url"].replace(".png?", ".jpg?", 1)}
+
+
 # last, so the /api routes above are matched first
 app.mount("/static", StaticFiles(directory=STATIC), name="static")
 
