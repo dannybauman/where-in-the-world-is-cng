@@ -1,0 +1,28 @@
+// groundstation, through the game's own /api routes, plus the small helpers every case uses
+export async function api(path) {
+  const ctrl = new AbortController(), t = setTimeout(() => ctrl.abort(), 90000);
+  try {
+    const r = await fetch(path, { signal: ctrl.signal });
+    if (!r.ok) throw new Error("The data service didn't answer.");
+    return await r.json();
+  } catch (e) { throw new Error(e.name === "AbortError" ? "The data service is slow right now." : e.message); }
+  finally { clearTimeout(t); }
+}
+export const q = o => new URLSearchParams(o).toString();
+// outside text (place names, alert titles) is escaped once, where it enters the game
+export const esc = t => String(t ?? "").replace(/[&<>"']/g, c => "&#" + c.charCodeAt(0) + ";");
+export const box = b => ({ w: b[0], s: b[1], e: b[2], n: b[3] });
+export const n = (x, d = 2) => Number(x).toFixed(d);
+export const iso = d => d.toISOString().slice(0, 10);
+export const day = id => { const m = id.match(/_(\d{4})(\d{2})(\d{2})_/); return m ? new Date(`${m[1]}-${m[2]}-${m[3]}T12:00Z`).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" }) : esc(id); };
+export const WATER = "(green-nir)/(green+nir)", BURN = "(nir-swir22)/(nir+swir22)";
+
+export const search = (b, start, end, cloud = 20) => api(`/api/search?${q({ ...box(b), start, end, max_cloud: cloud })}`);
+export const stats = async (item, ex, b) => { const r = await api(`/api/stats?${q({ item, expression: ex, ...box(b) })}`); if (!r.stats) throw new Error("The measurement didn't come back."); return r.stats.mean; };
+export const tiles = async (item, ex) => (await api(`/api/tiles?${q(ex ? { item, expression: ex } : { item })}`)).tiles;
+// the error text is escaped later, where the step engine shows it
+export async function geocode(name) {
+  const g = await api(`/api/geocode?${q({ q: name })}`);
+  if (!g.bbox) throw new Error(`Couldn't find "${name}". Try adding a state or country.`);
+  return g;
+}
