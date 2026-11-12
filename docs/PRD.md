@@ -20,6 +20,11 @@ People new to all of this: no GIS, no code, no remote sensing. If a step needs a
 6. **Probe before you write.** A new case is written only after a quick data check shows Groundstation returns what the case needs, at the place and dates it uses.
 7. **A love letter, not a copy.** The feel of the geography detective games we grew up with (a mystery place, clues that teach real geography, travel by deduction, ranks to climb, someone one step ahead), with nothing taken from them: no characters, names, agency, art, music or lines.
 8. **The open tools get the credit.** Every Notebook note links to the open project behind it.
+9. **Free, open and gentle on it.** No signup, no API key, for the player or for us: every source is open and reachable anonymously. The game is a light guest on free services (Danny, 2026-11-12: "make sure our game doesn't overload free endpoints, and doesn't need signup"):
+   - the server answers a repeat question from memory (a day for pictures and places, 10 minutes for live feeds);
+   - picture tiles load only inside the case box, at zoom 8 to 14;
+   - a case's place is found while writing the case, never looked up while playing;
+   - when a service says to slow down, we stop and come back later, never retry in a loop.
 
 ## The feel
 
@@ -46,7 +51,8 @@ Use-case themes behind this, ranked (from Danny's DevSeed notes, 2026-11-12): fo
 
 ## How it is built
 
-- Its own public repo, `dannybauman/where-in-the-world-is-cng`, installing Groundstation as a library pinned to a commit. Groundstation itself is not changed for the game.
+- Its own public repo, `dannybauman/where-in-the-world-is-cng` (MIT), installing Groundstation as a library pinned to a commit, so the game calls Groundstation's tools rather than copying them. Groundstation itself is not changed for the game. A Groundstation update reaches the game when the pin is moved on purpose and the game is tried.
+- No cloud AI model is used while playing, so hosting it needs no AI key; an "ask a question" case would change that, and waits.
 - `src/wherecng/app.py`: a small FastAPI app, thin routes over `groundstation.tools` (geocode, events, weather, search, stats, tiles).
 - `src/wherecng/static/index.html`: the whole game, vanilla JS and MapLibre with OpenFreeMap, no build step. Progress in localStorage (`gt2`).
 - Outside text (place names, alert titles, scene ids) is escaped where it enters the game.
@@ -67,5 +73,10 @@ Use-case themes behind this, ranked (from Danny's DevSeed notes, 2026-11-12): fo
 
 ## Open questions
 
-- The forest case place: probed 2026-11-12 at 3 guessed Amazon hotspots (Lábrea, Apuí, Novo Progresso, 3 km boxes, July-August 2021 vs 2025); none showed a drop in plant health. Next: find a clearing from a published deforestation alert first, then probe the embeddings there.
+- The forest case place, probed 2026-11-12:
+  - Compare 2021 with 2025 only through `compare_dates`, which corrects for the offset Sentinel-2 added in 2022; raw stats hid a real drop at Lábrea (0.81 to 0.72).
+  - Lábrea's drop looks like fire-scorched forest (the 2024 drought), not farms: a possible later case, not this one.
+  - A 36-box sweep of Triunfo do Xingu found only pasture changing with the season. A box average cannot find a clearing.
+  - Next: a clearing from INPE's DETER alerts (open, no signup; its WFS was overloaded on 2026-11-12, so try later, gently). MapBiomas Alerta and Global Forest Watch need an account, so they are out.
+  - The embeddings (OlmoEarth on Source Cooperative) are read anonymously; a 3 km box keeps each play to a few MB.
 - Can Groundstation reach Sentinel-1 radar for the flood case?

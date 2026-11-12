@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Ground Truth</title>
+<title>Where in the world is Cloud-Native Geospatial?</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Lexend:wght@400;600&family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,800&display=swap" rel="stylesheet">
@@ -131,7 +131,7 @@ input[type=text]:focus { border-color: var(--water); outline: none; }
   <div class="map-wrap" role="region" aria-label="Map">
     <div id="map"></div>
     <div class="brand">
-      <button class="logo" id="home-btn" type="button">Ground Truth</button>
+      <button class="logo" id="home-btn" type="button">Where in the world is CNG?</button>
       <button id="nb-btn" type="button">Notebook <span id="nb-count">0</span>/9</button>
     </div>
     <div class="flip" id="flip" role="group" aria-label="Show picture">
@@ -191,7 +191,9 @@ const map = new maplibregl.Map({ container: "map", style: "https://tiles.openfre
 map.addControl(new maplibregl.NavigationControl({ showCompass: false }), "top-right");
 const ready = new Promise(r => map.on("load", r));
 const fade = () => (matchMedia("(prefers-reduced-motion: reduce)").matches ? 0 : 400);
+let caseBox = null;
 async function frame(b) {
+  caseBox = b;
   await ready;
   const ring = [[b[0], b[1]], [b[2], b[1]], [b[2], b[3]], [b[0], b[3]], [b[0], b[1]]];
   const gj = { type: "Feature", geometry: { type: "Polygon", coordinates: [ring] } };
@@ -204,7 +206,9 @@ async function picture(slot, url) {
   const id = "pic-" + slot;
   if (map.getLayer(id)) map.removeLayer(id);
   if (map.getSource(id)) map.removeSource(id);
-  map.addSource(id, { type: "raster", tiles: [url], tileSize: 256, attribution: "Sentinel-2 via Earth Search, drawn by TiTiler" });
+  // the free tile service draws only the case box, at zooms where a 10 m pixel can be seen; past 14 the map stretches tiles it has
+  const pad = caseBox && Math.max(caseBox[2] - caseBox[0], caseBox[3] - caseBox[1]) * 0.5;
+  map.addSource(id, { type: "raster", tiles: [url], tileSize: 256, minzoom: 8, maxzoom: 14, ...(caseBox && { bounds: [caseBox[0] - pad, caseBox[1] - pad, caseBox[2] + pad, caseBox[3] + pad] }), attribution: "Sentinel-2 via Earth Search, drawn by TiTiler" });
   map.addLayer({ id, type: "raster", source: id, paint: { "raster-opacity-transition": { duration: fade() } } }, map.getLayer("box") ? "box" : undefined);
 }
 function flip(labelA, labelB) {
@@ -372,8 +376,10 @@ const CASES = [
         ask: { label: "Place name", placeholder: "e.g. Golden Gate Bridge", button: "Go", wait: "Finding it…", run: async name => {
           const g = await api(`/api/geocode?${q({ q: name })}`);
           if (!g.bbox) throw new Error(`Couldn't find "${esc(name)}". Try adding a state or country.`);
-          const [w, s, e, nn] = g.bbox, pad = Math.max(0.02, (e - w) * 0.15);
-          Object.assign(ctx, { box: [w - pad, s - pad, e + pad, nn + pad], full: esc(g.name) });
+          // a big place (a state, a country) gets a box about 30 km wide at its middle, the size one picture shows well
+          let [w, s, e, nn] = g.bbox;
+          const cx = (w + e) / 2, cy = (s + nn) / 2, half = Math.min(0.15, Math.max(e - w, nn - s) * 0.65 + 0.02);
+          Object.assign(ctx, { box: [cx - half, cy - half, cx + half, cy + half], full: esc(g.name) });
           await frame(ctx.box);
           return `<p>Found ${ctx.full}.</p>`;
         } } }),
@@ -382,7 +388,7 @@ const CASES = [
           const iso = d => d.toISOString().slice(0, 10), to = new Date();
           let items = [];
           for (const days of [60, 365]) { try { items = await best(ctx.box, iso(new Date(to - days * 864e5)), iso(to), 20); break; } catch {} }
-          if (!items.length) throw new Error("It's been too cloudy there. Go back to Ground Truth and try another place.");
+          if (!items.length) throw new Error("It's been too cloudy there. Go back and try another place.");
           const it = items.sort((x, y) => y.datetime.localeCompare(x.datetime))[0];
           ctx.scene = day(it.id);
           await picture("b", await tiles(it.id)); flip("Map", "From space");
