@@ -1,6 +1,9 @@
 // the step engine. A step is (ctx) => { title, text, and one of:
-// go (a button that fetches), ask (a text box), pick (a choice), guess, look (preview pictures, then choose), flipTask, tap (on the map)
+// go (a button that fetches), ask (a text box), pick (a choice), guess, look (preview pictures, then choose), flipTask, tap (on the map),
+// then (Then and now: an async function returning the beat, see thennow.js)
 import { esc } from "./api.js";
+import { play, card } from "./thennow.js";
+import { note } from "./notes.js";
 import { resetMap, armTap, mark, show } from "./map.js";
 import { star, starRow, rankLine } from "./moves.js";
 import { save, persist, rank } from "./save.js";
@@ -46,6 +49,7 @@ function render() {
   else if (s.look) lookStep(s, k);
   else if (s.flipTask) flipStep(s, k);
   else if (s.tap) tapStep(s, k);
+  else if (s.then) thenStep(s, k);
   else next();
   panel.scrollTop = 0;
 }
@@ -132,6 +136,19 @@ function tapStep(s, { ctx, body, doing }) {
     if (!ok) { body.insertAdjacentHTML("beforeend", `<p class="tapnote">Tap the map to try again.</p>`); arm(); }
   });
   arm();
+}
+
+async function thenStep(s, { ctx, body, ctl, next, run: mine, i }) {
+  const still = () => run === mine && run.i === i;
+  body.innerHTML = `<p class="wait" role="status">Getting the numbers…</p>`;
+  let spec;
+  try { spec = await s.then(ctx); }
+  catch { if (still()) { body.innerHTML = `<div class="say wrong" role="alert">The numbers didn't load. You can go on without them.</div>`; next(); } return; }
+  if (!still()) return;
+  await play(body, ctl, spec);
+  if (!still()) return;
+  body.insertAdjacentHTML("beforeend", card(spec) + (spec.note ? note(spec.note) : ""));
+  next();
 }
 
 export function start(c, onHome, opens) {

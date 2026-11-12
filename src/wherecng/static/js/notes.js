@@ -19,6 +19,7 @@ export const NOTES = {
   seasons: ["Seasons", "The same place looks different in winter and summer. Compare pictures from the same season.", ["Earth Search", "https://earth-search.aws.element84.com/v1"]],
   forest: ["Watching forests", "Satellites track forest loss year after year. Straight-edged cuts are a sign of clearing.", ["INPE TerraBrasilis", "https://terrabrasilis.dpi.inpe.br"]],
   shadows: ["Shadows show height", "Low sun casts shadows on one side of every ridge. That's how a flat picture shows deep valleys.", ["Sentinel-2", "https://sentinels.copernicus.eu/web/sentinel/missions/sentinel-2"]],
+  thennow: ["Then and now", "The old way downloaded whole files. Cloud-optimized files (COGs) let a map read only the tiles on screen. The game sizes each scene from the archive itself. Landsat prices: USGS, which made its archive free in 2008. 25 Mbps: the FCC's broadband line from 2015 until March 2024.", ["USGS: opening the Landsat archive", "https://www.usgs.gov/centers/eros/news/opening-landsat-archive-helped-realize-its-true-value"]],
   honest: ["Honest claims", "Say what you found, how you know, and what you can't tell. People trust the claim that names its limits.", ["groundstation", "https://github.com/dannybauman/groundstation"]],
 };
 export const countNotes = () => (document.getElementById("nb-count").textContent = `${save.notes.length}/${Object.keys(NOTES).length}`);

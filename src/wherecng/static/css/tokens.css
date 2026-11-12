@@ -64,6 +64,7 @@
   --width-bar-label: 7.5rem;
   --width-bar-value: 3.5rem;
   --width-input-min: 12rem;
+  --width-tn-label: 4.5em;
   --height-map-phone: 45vh;
   --height-map-phone: 45dvh; /* dvh follows the phone browser's moving address bar; vh above is the fallback */
   --height-sheet-max: 80vh;
@@ -82,6 +83,7 @@
   --motion-pulse: 1s;
   --motion-flight: 1800ms; /* the dotted line from guess to answer, read by map.js */
   --motion-drift: 7s;
+  --motion-oldway: 1100ms; /* one line of the old-way re-creation, read by thennow.js */
   --motion-settle: 20000ms; /* longest wait for map tiles, read by map.js; stays on under reduced motion */
   --drift-x: 25%;
   --drift-tilt: 3deg;
@@ -113,4 +115,4 @@
   --z-overlay: 2;
   --z-skip: 10;
 }
-@media (prefers-reduced-motion: reduce) { :root { --motion-slow: 0ms; --motion-flight: 0ms; --motion-drift: 0s; } }
+@media (prefers-reduced-motion: reduce) { :root { --motion-slow: 0ms; --motion-flight: 0ms; --motion-drift: 0s; --motion-oldway: 0ms; } }

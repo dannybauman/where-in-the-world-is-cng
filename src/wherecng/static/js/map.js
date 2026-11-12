@@ -13,6 +13,18 @@ const ready = new Promise(r => map.on("load", r));
 export const flyHome = () => map.flyTo({ center: [10, 25], zoom: Math.max(0, Math.log2(map.getContainer().clientWidth / 512)), duration: fade() * 3 });
 
 let caseBox = null, tapHandler = null, marker = null;
+
+// the tile service sends no Timing-Allow-Origin header, so the browser's resource timing reports 0 bytes for its tiles;
+// fetching them through this protocol counts the bytes that really arrive, for Then and now
+let tileBytes = 0;
+export const bytesRead = () => tileBytes;
+maplibregl.addProtocol("count", async (params, abort) => {
+  const r = await fetch(params.url.replace(/^count:/, "https:"), { signal: abort.signal });
+  if (!r.ok) throw new Error(`tile ${r.status}`);
+  const data = await r.arrayBuffer();
+  tileBytes += data.byteLength;
+  return { data };
+});
 const $ = id => document.getElementById(id);
 
 export async function frame(b) {
@@ -32,7 +44,7 @@ export async function picture(slot, url) {
   dropPicture(id);
   // the free tile service draws only the case box, at zooms where a 10 m pixel can be seen; past 14 the map stretches tiles it has
   const grow = caseBox && Math.max(caseBox[2] - caseBox[0], caseBox[3] - caseBox[1]) * 0.5;
-  map.addSource(id, { type: "raster", tiles: [url], tileSize: 256, minzoom: 8, maxzoom: 14, ...(caseBox && { bounds: [caseBox[0] - grow, caseBox[1] - grow, caseBox[2] + grow, caseBox[3] + grow] }), attribution: "Sentinel-2 via Earth Search, drawn by TiTiler" });
+  map.addSource(id, { type: "raster", tiles: [url.replace(/^https:/, "count:")], tileSize: 256, minzoom: 8, maxzoom: 14, ...(caseBox && { bounds: [caseBox[0] - grow, caseBox[1] - grow, caseBox[2] + grow, caseBox[3] + grow] }), attribution: "Sentinel-2 via Earth Search, drawn by TiTiler" });
   map.addLayer({ id, type: "raster", source: id, paint: { "raster-opacity-transition": { duration: fade() } } }, map.getLayer("box") ? "box" : undefined);
   await settled();
 }

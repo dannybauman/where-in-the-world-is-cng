@@ -3,8 +3,11 @@
     uv run wherecng   # then open http://127.0.0.1:8790
 """
 
+import json
 import re
 import time
+import urllib.request
+from concurrent.futures import ThreadPoolExecutor
 from functools import wraps
 from pathlib import Path
 
@@ -89,6 +92,28 @@ def api_tiles(item: str, expression: str | None = None, colormap: str = "rdylgn"
     if expression:
         return {"tiles": tools.tile_url_template("earth-search", "sentinel-2-l2a", item, expression=expression, colormap_name=colormap)}
     return {"tiles": tools.tile_url_template("earth-search", "sentinel-2-l2a", item, ["visual"])}
+
+
+EARTH_SEARCH = "https://earth-search.aws.element84.com/v1/collections/sentinel-2-l2a/items/"
+
+
+def _head_size(url):
+    with urllib.request.urlopen(urllib.request.Request(url, method="HEAD"), timeout=15) as r:
+        return int(r.headers.get("Content-Length") or 0)
+
+
+@app.get("/api/size")
+@cached(DAY)
+def api_size(item: str):
+    """What the old way downloaded: every file of the scene as the open archive stores it, sized by HEAD, never fetched"""
+    if not re.fullmatch(r"S2[ABC]_\w+_\d{8}_\d+_L2A", item):
+        raise HTTPException(400, "unknown scene")
+    with urllib.request.urlopen(EARTH_SEARCH + item, timeout=20) as r:
+        assets = json.load(r)["assets"]
+    tifs = {k: a["href"] for k, a in assets.items() if a.get("href", "").startswith("https://") and a["href"].endswith(".tif")}
+    with ThreadPoolExecutor(6) as pool:
+        sizes = dict(zip(tifs, pool.map(_head_size, tifs.values())))
+    return {"files": len(sizes), "bytes": sum(sizes.values()), "visual": sizes.get("visual", 0)}
 
 
 # the only scenes the game ever asks to preview, read once from the places list
