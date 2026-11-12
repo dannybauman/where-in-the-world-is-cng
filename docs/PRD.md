@@ -14,7 +14,7 @@ People new to all of this: no GIS, no code, no remote sensing. If a step needs a
 
 1. **Every choice is fair.** The player can answer it from what is on screen. Numbers appear after a choice, never as the hint that makes it.
 2. **Simple, short language.** One idea per sentence. Real terms (STAC, NDWI, embeddings) arrive as a Notebook note, after the player has used the thing.
-3. **Gradual.** First Look before any case. Cases open in order, each adding one new idea.
+3. **Gradual.** First Look before anything else. It opens the daily mystery round and the first case; the cases then open in order, each adding one new idea.
 4. **Real data, honest answers.** Every case runs on live open data through Groundstation. When the data says the claim does not hold, the game says so. Each case ends with claim, evidence and limits.
 5. **DevSeed-shaped cases.** Cases follow the kinds of problems Development Seed works on for partners and in Labs. A partner is named only when the work is public; otherwise the game describes the kind of problem.
 6. **Probe before you write.** A new case is written only after a quick data check shows Groundstation returns what the case needs, at the place and dates it uses.
@@ -24,15 +24,28 @@ People new to all of this: no GIS, no code, no remote sensing. If a step needs a
    - the server answers a repeat question from memory (a day for pictures and places, 10 minutes for live feeds);
    - picture tiles load only inside the case box, at zoom 8 to 14;
    - a case's place is found while writing the case, never looked up while playing;
+   - a mystery round loads one small picture (a 640 px JPEG), and map tiles only after the answer lands, inside its box;
    - when a service says to slow down, we stop and come back later, never retry in a loop.
 
 ## The feel
 
-- Each case opens with a mystery: "Where in the world is this?" or a claim to check.
-- Travel is a dotted flight line across the globe, with one fact about the place on landing.
-- Ranks, named for the craft: Pixel Peeper, Band Reader, Orbit Sleuth, Ground Truther.
-- The trickster is **a cheeky cloud** that drifts in front of the evidence. Beating it teaches real lessons: pick a clearer date, or use radar, which sees through clouds.
-- Look: colors from infrared imagery (magenta `#b8285e` life and burn, teal `#1f7a8c` water, ink `#142a33`); Bricolage Grotesque headings, Lexend body. Big map, case text beside it (below on a phone).
+Updated 2026-11-12.
+
+- Two ways to play. **Cases** are the story path: a claim to check, a few short steps, a case file at the end. **The mystery round** is the replay: "Where in the world is this?"
+- Travel is a dotted flight line along the great circle, from the player's pin to the answer. The map then lands on the place and lays the same picture into it. This is the one big moment; everything else stays quiet.
+- Ranks, named for the craft, rise from every star (cases plus the best score on each mystery place): Pixel Peeper 0, Band Reader 6, Orbit Sleuth 16, Ground Truther 30. Home shows the rank, a meter, and how many stars the next one needs.
+- The trickster is **a cheeky cloud**, a small drawn character. It drifts over the picture in some mystery rounds, over a real cloudy date of that place. The player beats it with "Pick a clearer date". Radar, which sees through clouds, waits for the flood case.
+- Words: one idea per sentence. Buttons say what happens. Errors say what to do. Long waits say which part they're on. A Notebook note shows once, the first time it's earned.
+- Look: colors from infrared imagery (magenta `#b8285e` life and burn, teal `#1f7a8c` water, ink `#142a33`); Bricolage Grotesque headings, Lexend body. Big map, game text beside it (below on a phone). Checked at 390 px and 1280 px.
+
+## The mystery round
+
+Added 2026-11-12. One satellite picture of a famous place, with no labels. Up to 3 short clues, one at a time, each teaching a bit of geography or remote sensing ("the fields are circles: center-pivot irrigation"). The player drops a pin on the world map and locks it in. The game flies the dotted line to the answer and scores by distance: within 300 km 3 stars, 1,000 km 2, 3,000 km 1. It ends with one fact and a Notebook note.
+
+- Everyone gets the same place each day (picked by date). "Play another" draws a place not yet solved with 3 stars.
+- 12 places, each with one Sentinel-2 scene picked by hand on 2026-11-12: under 1% cloud, covering the whole box, checked to draw. Nothing is searched while playing. Palm Jumeirah, the Exuma Cays, the Al Jawf circle farms, the Richat Structure, the Nile at Luxor, Manhattan, Mount Fuji, Venice, the Afsluitdijk, the Mississippi delta, Rondônia, the Grand Canyon.
+- The Afsluitdijk and the Mississippi delta also keep a real cloudy date, for the cloud character.
+- Keyboard: arrow keys move the map, Enter drops the pin at its center.
 
 ## Cases
 
@@ -40,12 +53,13 @@ Order and status as of 2026-11-12.
 
 | # | Case | Role | Idea it teaches | Status |
 |---|---|---|---|---|
-| 0 | First Look | Explorer | a satellite picture of a place you know; why only the part on screen loads (cloud-native files) | built; the cloud-native lesson to add |
+| 0 | First Look | Explorer | a satellite picture of a place you know; why only the part on screen loads (cloud-native files) | built; 3 steps; picks the recent clear picture that covers the most of the box |
+| - | The mystery round | Explorer | reading a picture: water color, circle fields, cities, seasons, size | built; opens after First Look; daily plus replay |
 | 1 | Forest case (working title) | Detective | was a forest cleared for farms after 2021: the player taps forest and farm spots, the game learns from them with embeddings and maps 2 years | next; needs a probed place |
 | 2 | After the Fire | Responder | burn index before and after; then what grew back | built; "grew back" to add |
 | 3 | Flood through clouds | Responder | radar sees through the cloud | idea; probe radar access first |
-| 4 | Right Now, Near You | Reporter | live feeds plus newest picture; to become "ask a question, get a map" | built; reshape later |
-| - | The Vanishing Lake | Detective | water index, honest debunk | built; to be replaced by the forest case |
+| 4 | Right Now, Near You | Reporter | live feeds plus the latest clear picture; to become "ask a question, get a map" | built; place, feeds and picture in one step; reshape later |
+| - | The Vanishing Lake | Detective | water index, honest debunk | built, opens second for now; to be replaced by the forest case |
 
 Use-case themes behind this, ranked (from Danny's DevSeed notes, 2026-11-12): forests and embeddings; flood and radar; ask a question, get a map; fire and recovery; why the data stays put.
 
@@ -53,10 +67,10 @@ Use-case themes behind this, ranked (from Danny's DevSeed notes, 2026-11-12): fo
 
 - Its own public repo, `dannybauman/where-in-the-world-is-cng` (MIT), installing Groundstation as a library pinned to a commit, so the game calls Groundstation's tools rather than copying them. Groundstation itself is not changed for the game. A Groundstation update reaches the game when the pin is moved on purpose and the game is tried.
 - No cloud AI model is used while playing, so hosting it needs no AI key; an "ask a question" case would change that, and waits.
-- `src/wherecng/app.py`: a small FastAPI app, thin routes over `groundstation.tools` (geocode, events, weather, search, stats, tiles).
-- `src/wherecng/static/index.html`: the page shell only. Vanilla JS (native ES modules) and MapLibre with OpenFreeMap, no build step. Progress in localStorage (`gt2`).
+- `src/wherecng/app.py`: a small FastAPI app, thin routes over `groundstation.tools` (geocode, events, weather, search, stats, tiles, and preview: one picture of a box, for the mystery round).
+- `src/wherecng/static/index.html`: the page shell only. Vanilla JS (native ES modules) and MapLibre with OpenFreeMap, no build step. Progress in localStorage (`gt2`): case stars, notes, best stars per mystery place and today's result. Old saves load as they are; fields are only ever added, and a save that can't be read is set aside under `gt2-unreadable`, never deleted.
 - `static/css/tokens.css` holds every design value (colors, fonts, type, space, radii, shadows, motion) as custom properties named by role. `static/css/app.css` reads only those, in layers (`reset, base, layout, components, utilities`), phone layout first and the wide one at 900px.
-- `static/js/`: small modules (api, map, engine, notes, save, home, main). One file per case in `js/cases/`; a new case is one new file plus one line in `js/cases/index.js`.
+- `static/js/`: small modules (api, map, engine, notes, save, home, main, mystery). One file per case in `js/cases/`; a new case is one new file plus one line in `js/cases/index.js`. Mystery places live in `js/places.js`; a new place is one entry with a scene id checked by hand.
 - `src/wherecng/app.py` serves `static/` at `/static`.
 - Smoke test, no network: `uv run python tests/test_smoke.py` (page loads, every file is served, imports resolve, JS parses).
 - Outside text (place names, alert titles, scene ids) is escaped where it enters the game.

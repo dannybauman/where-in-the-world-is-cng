@@ -60,8 +60,20 @@
   --height-sheet-max: 80vh;
   --height-sheet-max: 80dvh;
 
+  --space-map: 32px; /* map padding when it frames a place, read by map.js */
+  --size-cloud: 7rem;
+  --width-thumb: 6.5rem;
+  --height-photo-max: 22rem;
+  --height-photo-phone: 30vh;
+  --height-photo-phone: 30dvh;
+  --size-score: clamp(2.75rem, 2rem + 3vw, 4rem);
+  --border-flight: 4px;
+
   --motion-slow: 400ms;
   --motion-pulse: 1s;
+  --motion-flight: 1800ms; /* the dotted line from guess to answer, read by map.js */
+  --motion-drift: 7s;
+  --ease-out: cubic-bezier(.2, .8, .2, 1);
 
   --leading-tight: 1.15;
   --leading-snug: 1.4;
@@ -86,4 +98,4 @@
   --z-overlay: 2;
   --z-skip: 10;
 }
-@media (prefers-reduced-motion: reduce) { :root { --motion-slow: 0ms; } }
+@media (prefers-reduced-motion: reduce) { :root { --motion-slow: 0ms; --motion-flight: 0ms; --motion-drift: 0s; } }

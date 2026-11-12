@@ -9,8 +9,7 @@ export default {
   id: "lake", who: "Detective", title: "The Vanishing Lake", maxStars: 2,
   blurb: "A post says Lake Mead shrank a lot this year. Find out if it's true.",
   steps: [
-    () => ({ title: "A post is going viral", text: `<p>It says Lake Mead, the biggest reservoir in the US, shrank a lot in the past year. Your editor asks: true?</p><p>You can't fly to Nevada. But satellites photograph the lake every few days, so you'll check.</p>${note("satellite")}` }),
-    ctx => ({ title: "Find last summer's pictures", text: `<p>Search the archive for pictures of the lake from summer 2025.</p>`,
+    ctx => ({ title: "A post is going viral", text: `<p>It says Lake Mead, the biggest reservoir in the US, shrank a lot this past year. Your editor asks: true?</p><p>Start with last summer's pictures.</p>`,
       go: { label: "Search summer 2025", run: async () => {
         await frame(MEAD);
         const all = await best(MEAD, "2025-07-01", "2025-08-31", 90);
@@ -28,7 +27,7 @@ export default {
           reveal: cover(it),
           why: it === ctx.good ? "No clouds, and it shows most of the lake." : it.cloud_cover >= 40 ? "Clouds hide the water. You can't measure what you can't see." : "It's clear, but it misses part of the lake. Half a lake is half the evidence." })),
         preview: o => paint("a", o.it.id),
-        then: async () => { ctx.a = ctx.good; await paint("a", ctx.good.id); return `${note("clouds")}${note("fastmaps")}`; },
+        then: async () => { ctx.a = ctx.good; await paint("a", ctx.good.id); return note("clouds"); },
       } }),
     ctx => ({ title: "Now this summer", text: `<p>Get the same place, same season, one year later.</p>`,
       go: { label: "Search summer 2026", run: async () => {
@@ -39,7 +38,7 @@ export default {
       } } }),
     () => ({ title: "Your hunch?", text: `<p>Flip between the years a few times. Compared to last year, the lake has…</p>`,
       guess: { options: [{ key: "less", text: "Much less water" }, { key: "same", text: "About the same" }, { key: "more", text: "More water" }] } }),
-    ctx => ({ title: "Measure it", text: `<p>Eyes can fool you. Water looks dark in infrared, so a water score over every pixel tells you how much water is in the frame.</p>`,
+    ctx => ({ title: "Measure it", text: `<p>Eyes can fool you. A water score, worked out from infrared for every pixel, measures how much water is in the box. Higher means more water.</p>`,
       go: { label: "Measure the water", wait: "Measuring every pixel…", run: async () => {
         const [a, b] = await Promise.all([stats(ctx.a.id, WATER, MEAD), stats(ctx.b.id, WATER, MEAD)]);
         ctx.ma = a; ctx.mb = b;

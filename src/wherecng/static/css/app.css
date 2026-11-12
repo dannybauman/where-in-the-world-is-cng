@@ -48,7 +48,8 @@
   /* map overlays */
   .brand { position: absolute; left: var(--space-3); top: var(--space-3); z-index: var(--z-overlay); display: flex; gap: var(--space-2); }
   .brand button { white-space: nowrap; font-size: var(--step--1); border: 0; background: var(--color-sheet); border-radius: var(--radius-pill); padding: var(--space-2) var(--space-4); min-height: var(--size-touch); box-shadow: var(--shadow-1); cursor: pointer; font-weight: var(--weight-medium); }
-  @media (min-width: 900px) { .brand button { font-size: var(--step-0); } }
+  .brand .wide { display: none; }
+  @media (min-width: 900px) { .brand button { font-size: var(--step-0); } .brand .wide { display: inline; } }
   .brand .logo { font-family: var(--font-display); font-weight: var(--weight-display); }
   .flip { position: absolute; left: 50%; bottom: var(--size-flip-bottom); transform: translateX(-50%); z-index: var(--z-overlay); display: none; background: var(--color-sheet); border-radius: var(--radius-pill); padding: var(--space-1); box-shadow: var(--shadow-2); }
   .flip.on { display: flex; }
@@ -63,14 +64,86 @@
   input[type=text]:focus { border-color: var(--color-water); }
 
   /* home */
-  .intro h1 { font-size: var(--step-4); margin-bottom: var(--space-3); }
+  .intro h1 { font-size: var(--step-4); margin-bottom: var(--space-2); }
   .intro p { color: var(--color-ink-soft); }
-  .case { display: grid; grid-template-columns: 1fr auto; gap: var(--space-1) var(--space-3); width: 100%; text-align: left; background: none; border: 0; border-top: var(--border-thin) solid var(--color-line); padding: var(--space-4) 0; cursor: pointer; }
+
+  .rank { margin-top: var(--space-5); }
+  .rank-top { display: flex; align-items: baseline; gap: var(--space-3); }
+  .rank-top b { font-family: var(--font-display); font-size: var(--step-1); }
+  .rank-top .stars { margin-left: auto; }
+  .rank p { font-size: var(--step--1); color: var(--color-ink-soft); margin: var(--space-2) 0 0; }
+  .meter { height: var(--size-dot); border-radius: var(--radius-pill); background: var(--color-paper); margin-top: var(--space-2); overflow: hidden; }
+  .meter i { display: block; height: 100%; width: var(--w, 0%); background: var(--color-life); border-radius: inherit; transition: width var(--motion-slow) var(--ease-out); }
+
+  .mcard { display: grid; grid-template-columns: var(--width-thumb) 1fr; gap: var(--space-4); align-items: start; margin-top: var(--space-5); padding: var(--space-4); border-radius: var(--radius-lg); background: var(--color-ink); color: var(--color-paper); }
+  .mcard h2 { font-size: var(--step-2); margin: var(--space-1) 0 var(--space-2); }
+  .mcard p { margin: 0; color: var(--color-line); }
+  .mcard .who { color: var(--color-line); }
+  .mcard .row { margin-top: var(--space-3); }
+  .mcard .btn.quiet { color: var(--color-paper); border-color: var(--color-paper); }
+  .mcard .stars .off { color: var(--color-ink-soft); }
+  .mcard.locked { background: var(--color-paper); color: var(--color-ink-soft); }
+  .mcard.locked .who, .mcard.locked p { color: var(--color-ink-soft); }
+  .thumb { margin: 0; aspect-ratio: 1; border-radius: var(--radius-sm); background: var(--color-ink-soft); overflow: hidden; }
+  .mcard.locked .thumb { background: var(--color-line); }
+  .thumb img { width: 100%; height: 100%; object-fit: cover; display: block; opacity: 0; transition: opacity var(--motion-slow); }
+  .thumb.loaded img { opacity: 1; }
+
+  .path-title { font-size: var(--step-1); margin: var(--space-6) 0 var(--space-2); }
+  /* the cases are a real sequence, so they're numbered and joined by a line */
+  .path { list-style: none; margin: 0; padding: 0; }
+  .path li { position: relative; display: grid; grid-template-columns: var(--size-touch) 1fr; }
+  .path li:not(:last-child)::before { content: ""; position: absolute; left: calc(var(--size-touch) / 2 - var(--border-thin)); top: calc(var(--space-4) + var(--size-touch)); bottom: calc(-1 * var(--space-4)); border-left: var(--border-control) solid var(--color-line); }
+  .path li.done:not(:last-child)::before { border-color: var(--color-life); }
+  .node { width: var(--size-touch); height: var(--size-touch); margin-top: var(--space-4); display: grid; place-items: center; border-radius: 50%; font-family: var(--font-display); font-weight: var(--weight-display); background: var(--color-sheet); border: var(--border-control) solid var(--color-line); color: var(--color-ink-soft); }
+  .done .node { background: var(--color-life); border-color: var(--color-life); color: var(--color-on-life); }
+  .next .node { border-color: var(--color-life); color: var(--color-life); }
+  .case { display: grid; grid-template-columns: 1fr auto; gap: var(--space-1) var(--space-3); width: 100%; text-align: left; background: none; border: 0; padding: var(--space-4) 0 var(--space-4) var(--space-3); cursor: pointer; }
+  .case > :not(.stars) { grid-column: 1; }
   .case:hover:not([disabled]) h3 { color: var(--color-life); }
   .case[disabled] { cursor: default; opacity: var(--opacity-locked); }
   .case h3 { font-size: var(--step-1); }
-  .case p { grid-column: 1; color: var(--color-ink-soft); margin: 0; }
+  .case p { color: var(--color-ink-soft); margin: 0; }
   .case .stars { grid-row: 1 / span 3; grid-column: 2; align-self: center; }
+  .next .case .who { color: var(--color-life); }
+
+  /* the mystery round */
+  .mystery h2 { font-size: var(--step-3); margin: var(--space-1) 0 var(--space-4); }
+  .photo { position: relative; margin: 0; max-height: var(--height-photo-phone); max-width: 100%; border-radius: var(--radius-lg); overflow: hidden; background: var(--color-paper); box-shadow: var(--shadow-2); }
+  @media (min-width: 900px) { .photo { max-height: var(--height-photo-max); } }
+  .photo:not(.loaded)::after { content: "Loading the picture…"; position: absolute; inset: 0; display: grid; place-items: center; color: var(--color-ink-soft); font-size: var(--step--1); animation: pulse var(--motion-pulse) ease-in-out infinite; }
+  .photo.failed::after { content: "The picture didn't load. Go back and try again."; animation: none; }
+  .photo img { display: block; width: 100%; height: 100%; object-fit: cover; opacity: 0; transition: opacity var(--motion-slow); }
+  .photo.loaded img { opacity: 1; }
+  .photo.small { max-height: none; width: var(--width-thumb); float: right; margin: 0 0 var(--space-3) var(--space-4); box-shadow: var(--shadow-1); border-radius: var(--radius-sm); }
+  .clues { margin: var(--space-4) 0 0; padding: 0; list-style: none; counter-reset: clue; }
+  .clues li { counter-increment: clue; display: grid; grid-template-columns: var(--space-6) 1fr; padding: var(--space-2) 0; animation: arrive var(--motion-slow) var(--ease-out); }
+  .clues li::before { content: counter(clue); font-family: var(--font-display); font-weight: var(--weight-display); color: var(--color-water); }
+  @keyframes arrive { from { opacity: 0; transform: translateY(var(--space-2)); } }
+  .score { font-size: var(--step-1); margin: 0; }
+  .score b { display: block; font-family: var(--font-display); font-weight: var(--weight-display); font-size: var(--size-score); line-height: 1; letter-spacing: var(--tracking-display); color: var(--color-life); }
+  .result > .stars { display: block; font-size: var(--step-2); margin: var(--space-2) 0 var(--space-3); }
+  .result h2 { font-size: var(--step-2); margin-bottom: var(--space-3); }
+  .result .note { clear: both; }
+
+  /* the cheeky cloud drifts over the picture until the player picks a clearer date */
+  .cloud { position: absolute; inset: 0; display: grid; place-items: center; pointer-events: none; transition: transform var(--motion-slow) var(--ease-out), opacity var(--motion-slow); }
+  .cloud-svg { width: var(--size-cloud); filter: drop-shadow(var(--shadow-2)); animation: drift var(--motion-drift) ease-in-out infinite alternate; }
+  .cloud-svg path:first-child { fill: var(--color-sheet); }
+  .cloud-svg .eye { fill: var(--color-ink); }
+  .cloud-svg .grin { fill: none; stroke: var(--color-ink); stroke-linecap: round; }
+  .cloud.gone { transform: translateX(120%); opacity: 0; }
+  @keyframes drift { from { transform: translateX(-25%) rotate(-3deg); } to { transform: translateX(25%) rotate(3deg); } }
+  .cloudsay { margin: var(--space-3) 0 0; color: var(--color-ink-soft); }
+
+  .rank-line { margin-top: var(--space-4); padding: var(--space-3) var(--space-4); border-radius: var(--radius-sm); background: var(--color-paper); }
+  .rank-line b, .rank-line span { display: block; }
+  .rank-line span { font-size: var(--step--1); color: var(--color-ink-soft); }
+  .rank-line.up { background: var(--color-life); color: var(--color-on-life); animation: pop var(--motion-slow) var(--ease-out); }
+  .rank-line.up span { color: var(--color-on-life); }
+  @keyframes pop { from { transform: scale(.9); opacity: 0; } }
+  @media (prefers-reduced-motion: reduce) { .cloud-svg, .clues li, .rank-line.up, .photo:not(.loaded)::after { animation: none; } }
+  .sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
   .who { color: var(--color-water); font-weight: var(--weight-medium); font-size: var(--step--1); }
   .stars { color: var(--color-life); letter-spacing: var(--tracking-stars); font-size: var(--step-0); white-space: nowrap; }
   .stars .off { color: var(--color-line); }
@@ -109,14 +182,16 @@
   .list li:last-child { border: 0; }
 
   /* field notes */
-  .note { display: flex; gap: var(--space-3); margin-top: var(--space-4); padding: var(--space-3) var(--space-4); border-left: var(--border-accent) solid var(--color-water); background: var(--color-water-wash); border-radius: 0 var(--radius-sm) var(--radius-sm) 0; }
+  .note { margin-top: var(--space-4); padding: var(--space-3) var(--space-4); border-left: var(--border-accent) solid var(--color-water); background: var(--color-water-wash); border-radius: 0 var(--radius-sm) var(--radius-sm) 0; }
   .note b { display: block; }
-  .note p { margin: 0; font-size: var(--step--1); }
+  .note p { margin: var(--space-1) 0 0; font-size: var(--step--1); }
 
   /* finish */
   .end .who { font-size: var(--step-0); font-weight: var(--weight-bold); }
   .end h2 { font-size: var(--step-4); margin-bottom: var(--space-2); }
   .end .stars { font-size: var(--step-3); display: block; margin: var(--space-3) 0 var(--space-4); }
+  .opens { margin-top: var(--space-4); font-weight: var(--weight-medium); }
+  .file-title { font-size: var(--step-1); margin: var(--space-6) 0 var(--space-2); }
   .file { white-space: pre-wrap; font-size: var(--step--1); background: var(--color-paper); border-radius: var(--radius-sm); padding: var(--space-4); }
 
   /* notebook */

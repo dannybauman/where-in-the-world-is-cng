@@ -1,9 +1,9 @@
 // the step engine. A step is (ctx) => { title, text, and one of:
 // go (a button that fetches), ask (a text box), pick (a choice), guess, look (preview pictures, then choose), flipTask, tap (on the map)
 import { esc } from "./api.js";
-import { resetMap, armTap, mark } from "./map.js";
-import { star, starRow } from "./moves.js";
-import { save, persist } from "./save.js";
+import { resetMap, armTap, mark, show } from "./map.js";
+import { star, starRow, rankLine } from "./moves.js";
+import { save, persist, rank } from "./save.js";
 
 const $ = id => document.getElementById(id);
 const view = $("view"), panel = $("panel");
@@ -27,10 +27,14 @@ function render() {
   };
   const doing = async (btn, fn, waitText) => {
     if (btn) { btn.disabled = true; btn.hidden = true; }
-    body.innerHTML = `<p class="wait" role="status">${waitText || "Asking the satellite archive…"}</p>`;
+    const w = el(`<p class="wait" role="status"></p>`);
+    w.textContent = waitText || "Asking the satellite archive…";
+    body.replaceChildren(w);
+    // a long step tells the player which part it's on
+    ctx.say = t => { w.textContent = t; };
     try { body.innerHTML = await fn(); next(); return true; }
     catch (e) {
-      body.innerHTML = `<div class="say wrong" role="alert">${esc(e.message)} Try again in a moment.</div>`;
+      body.innerHTML = `<div class="say wrong" role="alert">${esc(e.message)}</div>`;
       if (btn) { btn.disabled = false; btn.hidden = false; btn.textContent = "Try again"; }
       return false;
     }
@@ -115,7 +119,7 @@ function flipStep(s, { ctx, body, next, run: mine, i }) {
   body.innerHTML = `<p class="tapnote">${s.flipTask}</p>`;
   $("flip-a").addEventListener("click", () => {
     if (run !== mine || run.i !== i) return;
-    star(ctx); body.innerHTML = `<div class="say">That's the switch. Tap "From space" to come back. You'll use it in every case.</div>`; next();
+    star(ctx); body.innerHTML = `<div class="say">That's the switch. Tap "From space" to bring the picture back.</div>`; next();
   }, { once: true });
 }
 
@@ -130,19 +134,26 @@ function tapStep(s, { ctx, body, doing }) {
   arm();
 }
 
-export function start(c, onHome) {
-  resetMap(); run = { c, i: 0, ctx: { stars: 0 }, onHome }; render();
+export function start(c, onHome, opens) {
+  resetMap(); run = { c, i: 0, ctx: { stars: 0 }, onHome, opens }; render();
   if (!panel.contains(document.activeElement) || document.activeElement === panel) panel.focus({ preventScroll: true });
 }
 
 function finish() {
-  const { c, ctx, onHome } = run, got = ctx.stars;
+  const { c, ctx, onHome, opens } = run, got = ctx.stars, before = rank(), wasDone = c.id in save.stars;
   save.stars[c.id] = Math.max(save.stars[c.id] || 0, got); persist();
+  if (document.getElementById("flip").classList.contains("on")) show("b");
   view.innerHTML = `<div class="end"><span class="who">${c.who}: ${c.title}</span>
-    <h2>Case closed</h2>${starRow(got, c.maxStars)}
-    <p>Your case file. Anyone with the same open data can check it.</p><div class="file">${c.file(ctx)}</div>
-    <div class="row"><button class="btn" id="copy" type="button">Copy case file</button><button class="btn quiet" id="back" type="button">More cases</button></div></div>`;
-  $("copy").onclick = async e => { await navigator.clipboard.writeText(document.querySelector(".file").innerText); e.target.textContent = "Copied"; };
+    <h2 tabindex="-1">Case closed</h2>${starRow(got, c.maxStars)}
+    ${rankLine(before)}
+    ${opens && !wasDone ? `<p class="opens">Now open: ${opens}.</p>` : ""}
+    <div class="row"><button class="btn" id="back" type="button">Back to cases</button></div>
+    <h3 class="file-title">Your case file</h3><p>Anyone with the same open data can check it.</p><div class="file">${c.file(ctx)}</div>
+    <div class="row"><button class="btn quiet" id="copy" type="button">Copy case file</button></div></div>`;
+  $("copy").onclick = async e => {
+    try { await navigator.clipboard.writeText(document.querySelector(".file").innerText); e.target.textContent = "Copied"; }
+    catch { e.target.textContent = "Select the text to copy it"; }
+  };
   $("back").onclick = onHome;
   $("back").focus({ preventScroll: true });
 }
