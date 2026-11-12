@@ -19,7 +19,9 @@ export function play(body, ctl, spec) {
     const finish = () => {
       if (over) return; over = true;
       clearTimeout(timer); cancelAnimationFrame(raf);
-      ol.innerHTML = spec.lines.map(lineHtml).join("");
+      // lines already shown keep their nodes, so a screen reader hears each line once
+      [...ol.children].forEach((li, k) => { const tick = li.querySelector(".tick"); if (tick) { tick.textContent = size(spec.lines[k].bytes); tick.removeAttribute("aria-hidden"); li.querySelector("b").style.setProperty("--w", "100%"); } });
+      ol.insertAdjacentHTML("beforeend", spec.lines.slice(i).map(lineHtml).join(""));
       ctl.replaceChildren(); done();
     };
     if (!dur) return finish();
@@ -32,7 +34,7 @@ export function play(body, ctl, spec) {
       const l = spec.lines[i++];
       ol.insertAdjacentHTML("beforeend", lineHtml(l));
       if (l.bytes) {
-        // the download fills over the line's time; the number is hidden from screen readers until it lands
+        // the download fills over the line's time; its ticking number stays hidden from screen readers until finish() sets the total
         const li = ol.lastElementChild, bar = li.querySelector("b"), tick = li.querySelector(".tick"), t0 = performance.now();
         tick.setAttribute("aria-hidden", "true");
         const grow = now => {

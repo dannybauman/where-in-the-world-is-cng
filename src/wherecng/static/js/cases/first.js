@@ -35,7 +35,10 @@ export default {
       flipTask: `Tap "Map" on the switch.` }),
     () => ({ title: "Look around", text: `<p>Drag to move. Pinch or scroll to zoom.</p><p>One pixel is about a house. You'll spot fields and roads, but not cars.</p>${note("fastmaps")}` }),
     () => ({ title: "Then and now", text: `<p>You just saw your place from space. Here's how that went before maps could read just part of a file.</p>`, then: async ctx => {
-      const sz = await ctx.size, read = bytesRead() - ctx.bytes0;
+      // a slow archive gets 10 s, then the beat says its numbers didn't load
+      const sz = await Promise.race([ctx.size, new Promise((_, no) => setTimeout(() => no(new Error("slow")), 10000))]);
+      const read = bytesRead() - ctx.bytes0;
+      if (!sz.bytes || !read) throw new Error("nothing measured");
       ctx.read = read; ctx.whole = sz.bytes;
       return {
         lines: [
@@ -44,7 +47,7 @@ export default {
           { text: "Open the files in desktop map software." },
           { text: "Crop to your place and mix 3 colors into 1 picture." },
         ],
-        head: read ? `You moved about ${Math.round(sz.bytes / read).toLocaleString("en-US")} times less data.` : "",
+        head: `Your map read about ${Math.round(sz.bytes / read).toLocaleString("en-US")} times less data.`,
         rows: [
           ["Data", `${size(sz.bytes)}, the whole scene`, `${size(read)}, only the tiles you looked at`],
           ["Wait", `About ${atBroadband(sz.bytes)} just to download, on 25 Mbps broadband`, `${ctx.secs} seconds from your question to the picture`],

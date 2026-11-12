@@ -94,30 +94,8 @@ def api_tiles(item: str, expression: str | None = None, colormap: str = "rdylgn"
     return {"tiles": tools.tile_url_template("earth-search", "sentinel-2-l2a", item, ["visual"])}
 
 
-EARTH_SEARCH = "https://earth-search.aws.element84.com/v1/collections/sentinel-2-l2a/items/"
-
-
-def _head_size(url):
-    with urllib.request.urlopen(urllib.request.Request(url, method="HEAD"), timeout=15) as r:
-        return int(r.headers.get("Content-Length") or 0)
-
-
-@app.get("/api/size")
-@cached(DAY)
-def api_size(item: str):
-    """What the old way downloaded: every file of the scene as the open archive stores it, sized by HEAD, never fetched"""
-    if not re.fullmatch(r"S2[ABC]_\w+_\d{8}_\d+_L2A", item):
-        raise HTTPException(400, "unknown scene")
-    with urllib.request.urlopen(EARTH_SEARCH + item, timeout=20) as r:
-        assets = json.load(r)["assets"]
-    tifs = {k: a["href"] for k, a in assets.items() if a.get("href", "").startswith("https://") and a["href"].endswith(".tif")}
-    with ThreadPoolExecutor(6) as pool:
-        sizes = dict(zip(tifs, pool.map(_head_size, tifs.values())))
-    return {"files": len(sizes), "bytes": sum(sizes.values()), "visual": sizes.get("visual", 0)}
-
-
 # the only scenes the game ever asks to preview, read once from the places list
-S2_ID = r"S2[ABC]_\w+_\d{8}_\d+_L2A"
+S2_ID = r"S2[ABC]_[0-9A-Z]+_\d{8}_\d+_L2A"
 SCENES = set(re.findall(S2_ID, (STATIC / "js/places.js").read_text()))
 
 
@@ -133,6 +111,36 @@ def _preview(item: str, w: float, s: float, e: float, n: float):
     """One picture of a box, for the mystery round. JPEG is about a tenth the size of the PNG"""
     r = tools.preview_item("earth-search", "sentinel-2-l2a", item, assets=["visual"], bbox=[w, s, e, n], max_size=640)
     return {"url": r["preview_url"].replace(".png?", ".jpg?", 1)}
+
+
+EARTH_SEARCH = "https://earth-search.aws.element84.com/v1/collections/sentinel-2-l2a/items/"
+
+
+def _head_size(url):
+    with urllib.request.urlopen(urllib.request.Request(url, method="HEAD"), timeout=15) as r:
+        n = r.headers.get("Content-Length")
+    if not n:  # a size we can't read fails the whole answer, so a too-small total is never shown or cached
+        raise ValueError(f"no size for {url}")
+    return int(n)
+
+
+@app.get("/api/size")
+def api_size(item: str):
+    if not re.fullmatch(S2_ID, item):
+        raise HTTPException(400, "unknown scene")
+    return _size(item=item)
+
+
+# ponytail: any well-formed id is accepted (First Look picks any scene) and the cache never evicts; bound it if this leaves 127.0.0.1
+@cached(DAY)
+def _size(item: str):
+    """What the old way downloaded: every file of the scene as the open archive stores it, sized by HEAD, never fetched"""
+    with urllib.request.urlopen(EARTH_SEARCH + item, timeout=20) as r:
+        assets = json.load(r)["assets"]
+    tifs = {k: a["href"] for k, a in assets.items() if a.get("href", "").startswith("https://") and a["href"].endswith(".tif")}
+    with ThreadPoolExecutor(6) as pool:
+        sizes = dict(zip(tifs, pool.map(_head_size, tifs.values())))
+    return {"files": len(sizes), "bytes": sum(sizes.values()), "visual": sizes.get("visual", 0)}
 
 
 # last, so the /api routes above are matched first
