@@ -6,6 +6,8 @@ The guardrails for this game. Read this before changing what the game is, who it
 
 Danny, 2026-11-11: "a game based on Groundstation that is for non-technical non-geospatial-expert users to learn about geospatial technology and relevant open source tools and data. it should be browser based, and use Groundstation under the hood, but gradually walk the player through scenarios as if they were a detective or natural disaster responder or data journalist wanting to answer important questions and share insights."
 
+Danny, 2026-11-12: "this game should not only be fun and use the CNG tools and data, it should also be purposeful in showing/teaching scenarios where CNG enables things that weren't possible otherwise, or were costly in money or time. maybe it can walk the player through (or simulate) an old way of doing something and then show how much better it is with CNG"
+
 ## Who it is for
 
 People new to all of this: no GIS, no code, no remote sensing. If a step needs a word they would not know, the step teaches the word or drops it.
@@ -27,6 +29,8 @@ People new to all of this: no GIS, no code, no remote sensing. If a step needs a
    - a mystery round loads one small picture (a 640 px JPEG), and map tiles only after the answer lands, inside its box;
    - when a service says to slow down, we stop and come back later, never retry in a loop.
 
+10. **Show what cloud-native makes possible.** Fun is the hook; the purpose is to show what cloud-native geospatial (CNG) made possible, cheap or fast that was not before. Each case and the mystery round carry one "Then and now" beat: a short re-creation of the old way beside the real new way.
+
 ## The feel
 
 Updated 2026-11-12.
@@ -46,6 +50,32 @@ Added 2026-11-12. One satellite picture of a famous place, with no labels. Up to
 - 12 places, each with one Sentinel-2 scene picked by hand on 2026-11-12: under 1% cloud, covering the whole box, checked to draw. Nothing is searched while playing. Palm Jumeirah, the Exuma Cays, the Al Jawf circle farms, the Richat Structure, the Nile at Luxor, Manhattan, Mount Fuji, Venice, the Afsluitdijk, the Mississippi delta, Rondônia, the Grand Canyon.
 - The Afsluitdijk and the Mississippi delta also keep a real cloudy date, for the cloud character.
 - Keyboard: arrow keys move the map, Enter drops the pin at its center.
+
+## Then and now
+
+One beat per case, at the moment the player has just done the new way, so the contrast lands on something they felt.
+
+How it plays:
+- The old way is a short, skippable re-creation, labeled as one ("How this was done in 2010"), with a fast-forward. It never makes the player wait for real.
+- The new way is what they just did, with its real numbers measured in the game: seconds taken, megabytes read (from the browser's own timing of the tiles and requests).
+- The end card puts the two side by side in plain words: time, money, data moved, who could do it.
+
+Honesty rules (principle 4 holds here too):
+- Every "then" number names its source and date in the Notebook note (for example: what a scene cost before Landsat went free in 2008, the size of a full Sentinel-2 product, a typical download speed of the time). No number goes in the game until its source is checked.
+- "Now" numbers are measured live, never typed in.
+- Where the old way was not slow but impossible (no archive, no free data, no global embeddings), say that instead of inventing a time.
+
+Which idea each beat shows:
+
+| Where | Then | Now (the CNG idea) |
+|---|---|---|
+| First Look | order and download a whole scene (around 1 GB), open it in desktop software, crop it | the map reads only the few tiles on screen (cloud-optimized files) |
+| Mystery round | find a picture agency by agency, often paid or by request | one search across the whole open archive in about a second (STAC) |
+| After the Fire | download every band for both dates, compute the burn index on your own computer | the index is computed next to the data and only the answer travels (dynamic tiling, TiTiler) |
+| Forest case | hand-label many field samples and train a model for weeks | a few taps on precomputed embeddings map the change |
+| Right Now, Near You | wait for a report or a press release | live feeds plus the newest picture, open to anyone |
+
+Status: designed 2026-11-12, not built yet.
 
 ## Cases
 
