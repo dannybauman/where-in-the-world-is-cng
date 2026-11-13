@@ -88,7 +88,7 @@ Order and status as of 2026-11-12.
 | - | The mystery round | Explorer | reading a picture: water color, circle fields, cities, seasons, size | built; opens after First Look; daily plus replay |
 | 1 | Forest case (working title) | Detective | was a forest cleared for farms after 2021: the player taps forest and farm spots, the game learns from them with embeddings and maps 2 years | next; needs a probed place |
 | 2 | After the Fire | Responder | burn index before and after; then what grew back | built; "grew back" to add |
-| 3 | Flood through clouds | Responder | radar sees through the cloud | idea; probe radar access first |
+| 3 | Flood through clouds | Responder | radar sees through the cloud | built (Flood Under the Clouds, 6 steps, 3 stars); Sentinel-1 radar from Planetary Computer over north Porto Alegre, May 2024: about 6 km² of a 43 km² box under water vs under 1 km² in Dec 2021 |
 | 4 | Right Now, Near You | Reporter | live feeds plus the latest clear picture; to become "ask a question, get a map" | built; place, feeds and picture in one step; reshape later |
 | - | The Vanishing Lake | Detective | water index, honest debunk | built, opens second for now; to be replaced by the forest case |
 
@@ -111,7 +111,7 @@ Slices, in order (each about 15 minutes, each shown in Danny's window before the
 1. A fresh-eyes playthrough by a helper, start to finish, listing every friction point in plain words, with the most weight on the cases. It grounds the rest; the slices below change if it finds something bigger.
 2. Deepen After the Fire: add "what grew back" (a later date, the same index, the change measured).
 3. Rebuild The Vanishing Lake around a number that holds (playthrough: the average water score over a mostly-desert box gave -0.13 vs -0.16 and a shaky verdict, and 2025 vs 2026 look the same). Measure the water's area inside the lake, over years far enough apart to see, and show the published lake level beside it. Or replace it with the Forest case once INPE DETER gives a clearing.
-4. A new case from the ranked themes: flood through clouds with radar (probe radar access first).
+4. A new case from the ranked themes: flood through clouds with radar. Done 2026-11-12.
 5. Give Right Now, Near You real content (playthrough: a quiet place gives a lookup and a quiz, no picture or layer). When nothing is near, go to the nearest live event and look at it.
 6. Copy sweep and story lines across all cases, including a closing "what you found, what it means" line on every case, a visible rule for stars with one retry, and plain words for STAC, COG and TiTiler.
 7. Design and polish pass, including the phone map (taller, controls off the area being judged), cases above the mystery card on a phone, and a spinner on every wait over a second.
@@ -153,4 +153,4 @@ Playthrough (slice 1, 2026-11-12): First Look, Lake, Fire and Right Now plus the
   - A 36-box sweep of Triunfo do Xingu found only pasture changing with the season. A box average cannot find a clearing.
   - Next: a clearing from INPE's DETER alerts (open, no signup; its WFS was overloaded on 2026-11-12, so try later, gently). MapBiomas Alerta and Global Forest Watch need an account, so they are out.
   - The embeddings (OlmoEarth on Source Cooperative) are read anonymously; a 3 km box keeps each play to a few MB.
-- Can Groundstation reach Sentinel-1 radar for the flood case?
+- Can Groundstation reach Sentinel-1 radar for the flood case? Yes, probed 2026-11-12: search, statistics and tiles all work on Planetary Computer `sentinel-1-rtc` (asset `vv`). Tile expressions are ignored there, so radar is drawn plain gray; the water count (`vv<0.02`) goes through statistics.

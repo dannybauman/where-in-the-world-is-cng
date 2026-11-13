@@ -2,6 +2,7 @@
 import first from "./first.js";
 import lake from "./lake.js";
 import fire from "./fire.js";
+import flood from "./flood.js";
 import news from "./news.js";
 
-export default [first, lake, fire, news];
+export default [first, lake, fire, flood, news];

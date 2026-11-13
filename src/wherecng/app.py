@@ -71,7 +71,14 @@ def api_weather(lat: float, lon: float):
 
 @app.get("/api/search")
 @cached(DAY)
-def api_search(w: float, s: float, e: float, n: float, start: str, end: str, max_cloud: float = 20):
+def api_search(w: float, s: float, e: float, n: float, start: str, end: str, max_cloud: float = 20, radar: bool = False):
+    if radar:  # radar sees through cloud, so no cloud filter; one scene covers the box, so no pass grouping
+        r = tools.search_imagery(
+            "planetary-computer", ["sentinel-1-rtc"], bbox=[w, s, e, n],
+            datetime_range=f"{start}T00:00:00Z/{end}T23:59:59Z", limit=20,
+        )
+        items = sorted([i for i in r.get("items", []) if i.get("footprint")], key=lambda i: -(i.get("covers_aoi_pct") or 0))
+        return {"items": items, "error": r.get("error")}
     r = tools.search_imagery(
         "earth-search", ["sentinel-2-l2a"], bbox=[w, s, e, n],
         datetime_range=f"{start}T00:00:00Z/{end}T23:59:59Z", max_cloud_cover=max_cloud, limit=100,
@@ -84,7 +91,7 @@ def api_search(w: float, s: float, e: float, n: float, start: str, end: str, max
 @app.get("/api/stats")
 def api_stats(item: str, expression: str, w: float, s: float, e: float, n: float, tiles: str = ""):
     ids = [t for t in tiles.split(",") if t]
-    if len(ids) > 8 or not all(re.fullmatch(S2_ID, t) for t in ids):
+    if len(ids) > 8 or not all(re.fullmatch(S2_ID, t) for t in ids) or not (re.fullmatch(S2_ID, item) or re.fullmatch(S1_ID, item)):
         raise HTTPException(400, "unknown scene")
     if len(ids) < 2:
         return _stats(item=item, expression=expression, w=w, s=s, e=e, n=n)
@@ -93,8 +100,8 @@ def api_stats(item: str, expression: str, w: float, s: float, e: float, n: float
 
 @cached(DAY)
 def _stats(item: str, expression: str, w: float, s: float, e: float, n: float):
-    r = tools.compute_statistics("earth-search", "sentinel-2-l2a", item, expression=expression, bbox=[w, s, e, n])
-    return _band(r)
+    cat, coll = _source(item)
+    return _band(tools.compute_statistics(cat, coll, item, expression=expression, bbox=[w, s, e, n]))
 
 
 def _band(r):
@@ -138,6 +145,8 @@ def _pass_stats(tiles: str, expression: str, w: float, s: float, e: float, n: fl
 @app.get("/api/tiles")
 @cached(DAY)
 def api_tiles(item: str, expression: str | None = None, colormap: str = "rdylgn"):
+    if re.fullmatch(S1_ID, item):  # planetary-computer ignores expressions, so radar is plain gray
+        return {"tiles": tools.tile_url_template("planetary-computer", "sentinel-1-rtc", item, ["vv"], rescale="0,0.3")}
     if expression:
         return {"tiles": tools.tile_url_template("earth-search", "sentinel-2-l2a", item, expression=expression, colormap_name=colormap)}
     return {"tiles": tools.tile_url_template("earth-search", "sentinel-2-l2a", item, ["visual"])}
@@ -145,6 +154,13 @@ def api_tiles(item: str, expression: str | None = None, colormap: str = "rdylgn"
 
 # the only scenes the game ever asks to preview, read once from the places list
 S2_ID = r"S2[ABC]_[0-9A-Z]+_\d{8}_\d+_L2A"
+S1_ID = r"S1[ABC]_IW_GRDH_1SDV_\w+_rtc"
+
+
+def _source(item):
+    return ("planetary-computer", "sentinel-1-rtc") if re.fullmatch(S1_ID, item) else ("earth-search", "sentinel-2-l2a")
+
+
 SCENES = set(re.findall(S2_ID, (STATIC / "js/places.js").read_text()))
 
 

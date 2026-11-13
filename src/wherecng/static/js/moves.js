@@ -3,8 +3,8 @@ import { search, tiles, iso, n } from "./api.js";
 import { picture } from "./map.js";
 import { rank } from "./save.js";
 
-export async function best(b, from, to, cloud = 20) {
-  const r = await search(b, from, to, cloud);
+export async function best(b, from, to, cloud = 20, radar = false) {
+  const r = await search(b, from, to, cloud, radar);
   if (!r.items?.length) throw new Error(`No clear pictures between ${from} and ${to}.`);
   return r.items;
 }

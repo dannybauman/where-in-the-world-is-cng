@@ -14,13 +14,13 @@ export const esc = t => String(t ?? "").replace(/[&<>"']/g, c => "&#" + c.charCo
 export const box = b => ({ w: b[0], s: b[1], e: b[2], n: b[3] });
 export const n = (x, d = 2) => Number(x).toFixed(d);
 export const iso = d => d.toISOString().slice(0, 10);
-export const day = id => { const m = id.match(/_(\d{4})(\d{2})(\d{2})_/); return m ? new Date(`${m[1]}-${m[2]}-${m[3]}T12:00Z`).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" }) : esc(id); };
-export const WATER = "(green-nir)/(green+nir)", BURN = "(nir-swir22)/(nir+swir22)";
+export const day = id => { const m = id.match(/_(\d{4})(\d{2})(\d{2})[_T]/); return m ? new Date(`${m[1]}-${m[2]}-${m[3]}T12:00Z`).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" }) : esc(id); };
+export const WATER = "(green-nir)/(green+nir)", BURN = "(nir-swir22)/(nir+swir22)", RADAR_WATER = "vv<0.02";
 
 // a picture is a satellite pass of several tiles: search() remembers which tiles each pass is made of
 const passTiles = new Map();
-export const search = async (b, start, end, cloud = 20) => {
-  const r = await api(`/api/search?${q({ ...box(b), start, end, max_cloud: cloud })}`);
+export const search = async (b, start, end, cloud = 20, radar = false) => {
+  const r = await api(`/api/search?${q({ ...box(b), start, end, max_cloud: cloud, ...(radar && { radar: 1 }) })}`);
   for (const it of r.items || []) passTiles.set(it.id, it.tiles || [it.id]);
   return r;
 };
