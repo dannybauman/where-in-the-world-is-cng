@@ -1,5 +1,6 @@
 // the mystery round: a satellite picture, 3 clues, one pin, a flight to the answer
 import { api, q, box, tiles, iso, esc } from "./api.js";
+import { play, card } from "./thennow.js";
 import { map, resetMap, flyHome, armTap, disarm, mark, flight, frame, picture, fade } from "./map.js";
 import { PLACES, todayIndex, center, km, starsFor } from "./places.js";
 import { leave } from "./engine.js";
@@ -85,6 +86,9 @@ export function mystery(i, onHome) {
     save.mystery[p.id] = Math.max(save.mystery[p.id] || 0, stars);
     if (daily) save.day = { date: iso(new Date()), id: p.id, km: d, stars };
     persist();
+    // the "now" of Then and now: a real search for this box, asked while the line flies
+    const found = api(`/api/find?${q(box(p.box))}`); found.catch(() => {});
+    const first = !save.notes.includes("search");
     hint.innerHTML = `<span class="wait" role="status">Flying to the answer…</span>`;
     await flight(guess, goal);
     if (!fig.isConnected) return;
@@ -95,16 +99,49 @@ export function mystery(i, onHome) {
       <figure class="photo small loaded" style="aspect-ratio:${ratio(p.box).toFixed(3)}"><img src="${esc(img.src)}" alt="The picture you were shown, of ${p.name}"></figure>
       <p>${p.fact}</p>
       ${note(p.note)}
+      <section aria-label="Then and now"><div id="tnbody"></div><div class="row" id="tnctl"></div></section>
       ${rankLine(before)}
       <div class="row"><button class="btn" type="button" id="again">Play another</button><button class="btn quiet" type="button" id="home2">Back to cases</button></div></div>`;
     $("again").onclick = () => mystery(nextPlace(i), onHome);
     $("home2").onclick = onHome;
     $("panel").scrollTop = 0;
     $("again").focus({ preventScroll: true });
+    thenNow(found, first);
     // a beat on the whole line, then land on the answer and lay the same picture into the real map, inside its box only
     await new Promise(r => setTimeout(r, fade() * 3));
     if (!$("again")) return;
     frame(p.box);
     try { await picture("b", await tiles(p.scene)); } catch {}
   };
+}
+
+// Then and now: finding a picture agency by agency, against one timed search. The re-creation plays once; later rounds show the card
+async function thenNow(found, first) {
+  const body = $("tnbody"), ctl = $("tnctl");
+  body.innerHTML = `<p class="wait" role="status">Timing a real search…</p>`;
+  let r;
+  try {
+    r = await Promise.race([found, new Promise((_, no) => setTimeout(() => no(new Error("slow")), 10000))]);
+    if (!r.matched || !r.secs) throw new Error("nothing measured");
+  } catch { if (body.isConnected) body.innerHTML = `<div class="say wrong" role="alert">The search numbers didn't load.</div>`; return; }
+  if (!body.isConnected) return;
+  const secs = `${r.secs.toFixed(1)} seconds`, n = r.matched.toLocaleString("en-US");
+  const spec = {
+    lines: [
+      { text: "Guess which agency might have a picture of this place." },
+      { text: "Make an account on its website." },
+      { text: "Search with its own form, its own way." },
+      { text: "Nothing good? Try the next agency and start again." },
+    ],
+    head: `One search found ${n} pictures of this place in ${secs}.`,
+    rows: [
+      ["Search", "One agency at a time, each with its own tools", `One search of the open Sentinel-2 archive: ${secs}`],
+      ["Found", "What that one agency had", `${n} pictures of this place, every date the archive holds`],
+      ["Account", "One for each agency", "None"],
+      ["Price", "Before 2008, one Landsat picture cost $400 to $4,000", "Free"],
+    ],
+  };
+  if (first) await play(body, ctl, spec);
+  else body.innerHTML = `<p class="then-label">Then and now</p>`;
+  if (body.isConnected) body.insertAdjacentHTML("beforeend", card(spec) + note("search"));
 }

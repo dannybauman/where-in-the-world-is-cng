@@ -114,6 +114,7 @@ def _preview(item: str, w: float, s: float, e: float, n: float):
 
 
 EARTH_SEARCH = "https://earth-search.aws.element84.com/v1/collections/sentinel-2-l2a/items/"
+STAC_SEARCH = "https://earth-search.aws.element84.com/v1/search"
 
 
 def _head_size(url):
@@ -141,6 +142,21 @@ def _size(item: str):
     with ThreadPoolExecutor(6) as pool:
         sizes = dict(zip(tifs, pool.map(_head_size, tifs.values())))
     return {"files": len(sizes), "bytes": sum(sizes.values()), "visual": sizes.get("visual", 0)}
+
+
+@app.get("/api/find")
+def api_find(w: float, s: float, e: float, n: float):
+    """The mystery round's "now": one real search of the open Sentinel-2 archive for this box, every date, timed.
+    Never cached, so the time is a real search"""
+    body = json.dumps({"collections": ["sentinel-2-l2a"], "bbox": [w, s, e, n], "limit": 1, "fields": {"include": ["id"]}}).encode()
+    req = urllib.request.Request(STAC_SEARCH, body, {"content-type": "application/json"})
+    t0 = time.perf_counter()
+    try:
+        with urllib.request.urlopen(req, timeout=20) as r:
+            matched = json.load(r).get("numberMatched")
+    except Exception as ex:  # same as cached(): say so plainly, never retry
+        return JSONResponse({"error": f"{type(ex).__name__}: the service didn't answer"}, status_code=502)
+    return {"matched": matched, "secs": round(time.perf_counter() - t0, 2)}
 
 
 # last, so the /api routes above are matched first

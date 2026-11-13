@@ -76,7 +76,7 @@ Which idea each beat shows:
 | Forest case | hand-label many field samples and train a model for weeks | a few taps on precomputed embeddings map the change |
 | Right Now, Near You | wait for a report or a press release | live feeds plus the newest picture, open to anyone |
 
-Status: designed 2026-11-12. First Look built 2026-11-12: the map counts the tile bytes it fetches (TiTiler sends no Timing-Allow-Origin, so resource timing reads 0), and `/api/size` sizes the whole scene by HEAD from Earth Search. The other beats are not built yet.
+Status: designed 2026-11-12. First Look built 2026-11-12: the map counts the tile bytes it fetches (TiTiler sends no Timing-Allow-Origin, so resource timing reads 0), and `/api/size` sizes the whole scene by HEAD from Earth Search. Mystery round built 2026-11-12: `/api/find` times one real, uncached STAC search of Earth Search's Sentinel-2 archive for the place's box and reports how many pictures it holds; the re-creation plays the first time, later rounds show only the card. Source for "agency by agency": stacspec.org/en/about. The other beats are not built yet.
 
 ## Cases
 
