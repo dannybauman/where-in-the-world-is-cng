@@ -31,20 +31,22 @@ export default {
     ctx => ({ title: "A post is going viral", text: `<p>It says Lake Mead, the biggest reservoir in the US, is almost gone. Your editor asks: true?</p><p>Start with the latest summer's pictures.</p>`,
       go: { label: "Search summer 2026", run: async () => {
         await frame(MEAD);
-        const all = await best(MEAD, "2026-07-01", "2026-08-31", 90);
-        const good = all.find(i => i.cloud_cover < 10 && i.covers_aoi_pct >= 70);
-        if (!good) throw new Error("No clear picture of the whole lake that summer.");
-        const part = all.find(i => i.cloud_cover < 20 && i.covers_aoi_pct < 50 && day(i.id) !== day(good.id));
-        const cloudy = all.find(i => i.cloud_cover >= 40);
-        ctx.good = good; ctx.list = [part, good, cloudy].filter(Boolean);
+        // two half-month searches, because one search returns at most 20 pictures and the edge tiles crowd out the full-lake ones
+        const all = (await Promise.all([best(MEAD, "2026-08-01", "2026-08-15", 100), best(MEAD, "2026-08-16", "2026-08-31", 100)])).flat();
+        const whole = all.filter(i => i.covers_aoi_pct >= 70).sort((x, y) => x.cloud_cover - y.cloud_cover);
+        const good = whole[0];
+        if (!good || good.cloud_cover >= 10) throw new Error("No clear picture of the whole lake that summer.");
+        const some = whole.find(i => i.cloud_cover >= 15 && i.cloud_cover < 40);
+        const cloudy = whole.find(i => i.cloud_cover >= 40);
+        ctx.good = good; ctx.list = [some, good, cloudy].filter(Boolean);
         return `<p>Found ${all.length} pictures. Here are ${ctx.list.length} of them.</p>${note("stac")}`;
       } } }),
-    ctx => ({ title: "Which picture is the best evidence?", text: `<p>Tap each picture to see it on the map. Look for clouds, and for parts of the lake that are missing.</p>`,
+    ctx => ({ title: "Which picture is the best evidence?", text: `<p>Tap each picture to see it on the map. All of them show the whole lake. Look for clouds.</p>`,
       look: {
         hint: "Pick the one you trust most.",
         options: ctx.list.map((it, k) => ({ it, text: `Picture ${k + 1}, ${day(it.id)}`, right: it === ctx.good,
           reveal: cover(it),
-          why: it === ctx.good ? "No clouds, and it shows most of the lake." : it.cloud_cover >= 40 ? "Clouds hide the water. You can't measure what you can't see." : "It's clear, but it only shows a strip of the lake. You can't measure what isn't in the picture." })),
+          why: it === ctx.good ? "No clouds, and it shows most of the lake." : it.cloud_cover >= 40 ? "Clouds hide the water. You can't measure what you can't see." : "A few clouds and their shadows hide bits of the lake. They would throw off the count." })),
         preview: o => paint("a", o.it.id),
         then: async () => { ctx.b = ctx.good; await paint("b", ctx.good.id); return note("clouds"); },
       } }),
