@@ -3,11 +3,13 @@ import { frame, flip } from "../map.js";
 import { best, paint, cover, star } from "../moves.js";
 import { note } from "../notes.js";
 
-// the main body of the lake, kept inside one satellite tile so every pixel in the box has data
-const MEAD = [-114.72, 36.06, -114.35, 36.4];
+// the whole lake (OpenStreetMap bounds), trimmed to tile 11SQA's west edge so one picture covers about 95% of it
+const MEAD = [-114.78, 36.01, -114.1, 36.43];
+// the shallow north end, where the shoreline moves most
+const OVERTON = [-114.48, 36.3, -114.33, 36.45];
 const BOX_KM2 = (MEAD[2] - MEAD[0]) * 111.32 * Math.cos(((MEAD[1] + MEAD[3]) / 2) * Math.PI / 180) * (MEAD[3] - MEAD[1]) * 110.95;
 // official end-of-month lake level in feet, from https://www.usbr.gov/lc/region/g4000/hourly/mead-elv.html (US Bureau of Reclamation, read 2026-11-12)
-const LEVEL = { "2019-08": 1083.45, "2022-08": 1044.28, "2026-07": 1041.1, "2026-08": 1038.83 };
+const LEVEL = { "2020-04": 1096.39, "2022-08": 1044.28, "2026-07": 1041.1, "2026-08": 1038.83 };
 const IS_WATER = `(${WATER})>0`;
 
 const level = it => LEVEL[it.id.match(/_(\d{4})(\d{2})\d{2}_/).slice(1, 3).join("-")];
@@ -46,25 +48,26 @@ export default {
         preview: o => paint("a", o.it.id),
         then: async () => { ctx.b = ctx.good; await paint("b", ctx.good.id); return note("clouds"); },
       } }),
-    ctx => ({ title: "Go back in time", text: `<p>One summer says little. Look at the same season in 2019, when the lake was fuller, and in 2022, a very dry year.</p>`,
-      go: { label: "Get 2019 and 2022", wait: "Searching 2 more summers…", run: async () => {
-        const [a, c] = await Promise.all([clear("2019-08-10", "2019-08-31"), clear("2022-08-10", "2022-08-31")]);
+    ctx => ({ title: "Go back in time", text: `<p>One picture says little. Look at spring 2020, the fullest the lake has been since these satellites launched, and at summer 2022, a very dry year.</p>`,
+      go: { label: "Get 2020 and 2022", wait: "Searching 2 more years…", run: async () => {
+        const [a, c] = await Promise.all([clear("2020-04-01", "2020-04-30"), clear("2022-08-10", "2022-08-31")]);
         if (!a || !c) throw new Error("No clear picture of the whole lake in one of those summers.");
         ctx.a = a; ctx.c = c;
         await paint("a", a.id); await paint("b", ctx.b.id);
-        flipDates(ctx);
-        return `<p>Flip between ${year(a)} and ${year(ctx.b)} with the switch on the map.</p>${note("compare")}`;
+        flipDates(ctx); await frame(OVERTON);
+        return `<p>This is the lake's shallow north end, where a drop shows most. Flip between ${year(a)} and ${year(ctx.b)} with the switch on the map.</p>${note("compare")}`;
       } } }),
-    () => ({ title: "Your hunch?", text: `<p>Flip between 2019 and 2026 a few times. Compared to 2019, the lake is…</p>`,
+    () => ({ title: "Your hunch?", text: `<p>Flip between 2020 and 2026 a few times. Compared to 2020, the lake is…</p>`,
       guess: { options: [{ key: "gone", text: "Almost gone" }, { key: "less", text: "Smaller, but far from gone" }, { key: "same", text: "About the same" }] } }),
     ctx => ({ title: "Measure the water", text: `<p>Eyes can fool you. For every pixel, a water score uses infrared to say water or not water. Count the water pixels and you get the lake's area in square km.</p>`,
       go: { label: "Measure the water", wait: "Counting water pixels…", run: async () => {
+        await frame(MEAD);
         const [fa, fc, fb] = await Promise.all([ctx.a, ctx.c, ctx.b].map(it => stats(it.id, IS_WATER, MEAD)));
-        ctx.rows = [{ it: ctx.a, km2: fa * BOX_KM2 }, { it: ctx.c, km2: fc * BOX_KM2 }, { it: ctx.b, km2: fb * BOX_KM2 }].map(r => ({ ...r, year: year(r.it) }));
+        ctx.rows = [{ it: ctx.a, f: fa }, { it: ctx.c, f: fc }, { it: ctx.b, f: fb }].map(r => ({ it: r.it, km2: r.f * BOX_KM2 * r.it.covers_aoi_pct / 100, year: year(r.it) }));
         ctx.drop = Math.round(((ctx.rows[0].km2 - ctx.rows[2].km2) / ctx.rows[0].km2) * 100);
         ctx.verdict = ctx.drop >= 60 ? "gone" : ctx.drop >= 8 ? "less" : "same";
         const right = ctx.guess === ctx.verdict; if (right) star(ctx);
-        const said = { gone: "Almost all the water is gone.", less: `The lake is ${ctx.drop}% smaller than in 2019. That is a lot, but it is not almost gone.`, same: "Barely any change." }[ctx.verdict];
+        const said = { gone: "Almost all the water is gone.", less: `The lake is ${ctx.drop}% smaller than in ${ctx.rows[0].year}. That is a lot, but it is not almost gone.`, same: "Barely any change." }[ctx.verdict];
         return `<p>Water area in this box, square km:</p>${areaBars(ctx.rows)}<div class="say ${right ? "" : "wrong"}">${said} ${right ? "Your hunch was right." : "Not what you guessed, which is why we measure."}</div>${note("bands")}`;
       } } }),
     ctx => ({ title: "Check the official level", text: `<p>A satellite number is a clue. The US Bureau of Reclamation measures the lake's height at Hoover Dam. Put the two side by side.</p>`,
@@ -73,12 +76,12 @@ export default {
         const same = rows.every((r, k) => k === 0 || (r.km2 < rows[k - 1].km2) === (r.ft < rows[k - 1].ft));
         ctx.ftDrop = rows[0].ft - rows[2].ft;
         const lines = rows.map(r => `<li><b>${r.year}</b>: ${km(r.km2)} km² of water, official level ${ft(r.ft)}</li>`).join("");
-        return `<ul>${lines}</ul><div class="say ${same ? "" : "wrong"}">${same ? `The 2 agree. Each year the water area and the level move the same way. From 2019 to 2026 the level fell ${ft(ctx.ftDrop)}.` : "The 2 don't line up. Don't publish until you know why."}</div>${note("groundtruth")}`;
+        return `<ul>${lines}</ul><div class="say ${same ? "" : "wrong"}">${same ? `The 2 agree. Each year the water area and the level move the same way. From ${ctx.rows[0].year} to ${ctx.rows[2].year} the level fell ${ft(ctx.ftDrop)}.` : "The 2 don't line up. Don't publish until you know why."}</div>${note("groundtruth")}`;
       } } }),
     ctx => ({ title: "Brief the public", text: `<p>Which line do you hand your editor?</p>`,
       pick: { options: [
         { text: "Lake Mead is almost gone.", right: false, why: "The lake lost water but most of it is still there. Overclaiming costs trust." },
-        { text: `Satellite pictures show the lake's water area is ${ctx.drop}% smaller than in 2019, and the official level is down ${ft(ctx.ftDrop)}. The lake is low, not gone.`, right: true, why: "What you found, how you know, and what's still unsure." },
+        { text: `Satellite pictures show the lake's water area is ${ctx.drop}% smaller than in ${ctx.rows[0].year}, and the official level is down ${ft(ctx.ftDrop)}. The lake is low, not gone.`, right: true, why: "What you found, how you know, and what's still unsure." },
         { text: "The lake is the cleanest it has ever been.", right: false, why: "Nothing you measured is about water quality." },
       ], then: async () => note("honest") } }),
   ],
