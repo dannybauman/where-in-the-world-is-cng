@@ -110,10 +110,13 @@ The calls (made 2026-11-12, Danny's "your call" on the rest):
 Slices, in order (each about 15 minutes, each shown in Danny's window before the next):
 1. A fresh-eyes playthrough by a helper, start to finish, listing every friction point in plain words, with the most weight on the cases. It grounds the rest; the slices below change if it finds something bigger.
 2. Deepen After the Fire: add "what grew back" (a later date, the same index, the change measured).
-3. Deepen The Vanishing Lake into a real multi-year story (the water index over several years, checked against the measured lake level), or replace it with the Forest case once INPE DETER gives a clearing.
+3. Rebuild The Vanishing Lake around a number that holds (playthrough: the average water score over a mostly-desert box gave -0.13 vs -0.16 and a shaky verdict, and 2025 vs 2026 look the same). Measure the water's area inside the lake, over years far enough apart to see, and show the published lake level beside it. Or replace it with the Forest case once INPE DETER gives a clearing.
 4. A new case from the ranked themes: flood through clouds with radar (probe radar access first).
-5. Copy sweep and story lines across all cases.
-6. Design and polish pass.
+5. Give Right Now, Near You real content (playthrough: a quiet place gives a lookup and a quiz, no picture or layer). When nothing is near, go to the nearest live event and look at it.
+6. Copy sweep and story lines across all cases, including a closing "what you found, what it means" line on every case, a visible rule for stars with one retry, and plain words for STAC, COG and TiTiler.
+7. Design and polish pass, including the phone map (taller, controls off the area being judged), cases above the mystery card on a phone, and a spinner on every wait over a second.
+
+Playthrough (slice 1, 2026-11-12): First Look, Lake, Fire and Right Now plus the mystery round at 1280 px, First Look and Fire at 390 px. Fire is the strongest case. The place-name bug ("Portland (US is totally safe") was fixed on the spot.
 
 ## How it is built
 
