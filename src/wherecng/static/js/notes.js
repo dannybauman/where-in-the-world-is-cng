@@ -24,6 +24,7 @@ export const NOTES = {
   radar: ["Radar", "Sentinel-1 sends its own microwave signal and times the echo, so it sees through clouds, day or night. Calm water bounces the signal away like a mirror, so it looks black.", ["Sentinel-1", "https://sentinels.copernicus.eu/web/sentinel/missions/sentinel-1"]],
   zarr: ["Zarr", "A COG holds one picture. Zarr holds a whole stack, like 40 years of daily weather, cut into small chunks. A program reads only the chunks it needs.", ["zarr.dev", "https://zarr.dev"]],
   direct: ["Straight from the bucket", "This game asks a server, TiTiler, to cut each map piece. Newer tools let the web page read a COG or Zarr file straight from cloud storage, with no server in between.", ["Cloud-native geo guide", "https://guide.cloudnativegeo.org"]],
+  mark: ["Reading the mark", "Every kind of event leaves its own mark: how wide, how long, and how long it lasts. Measure the mark and you can name the cause, even from space.", null],
   honest: ["Honest claims", "Say what you found, how you know, and what you can't tell. People trust the claim that names its limits.", ["groundstation", "https://github.com/dannybauman/groundstation"]],
 };
 export const countNotes = () => (document.getElementById("nb-count").textContent = `${save.notes.length}/${Object.keys(NOTES).length}`);
