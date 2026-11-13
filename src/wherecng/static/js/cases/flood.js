@@ -1,20 +1,13 @@
 import { day, n, stats, RADAR_WATER } from "../api.js";
 import { frame, flip, show } from "../map.js";
-import { best, paint, star } from "../moves.js";
+import { best, paint, star, pct, pctBars } from "../moves.js";
 import { note } from "../notes.js";
 
 // north Porto Alegre: the Salgado Filho airport, Sarandi, Humaita
 const FLOOD = [-51.2, -30.0, -51.12, -29.95];
 const BOX_KM2 = (FLOOD[2] - FLOOD[0]) * 111.32 * Math.cos(((FLOOD[1] + FLOOD[3]) / 2) * Math.PI / 180) * (FLOOD[3] - FLOOD[1]) * 110.95;
-const pct = v => `${Math.round(v * 100)}%`;
 const km = v => v < 1 ? n(v, 1) : Math.round(v).toLocaleString("en-US");
 
-function pctBars(name, a, b, la, lb) {
-  const w = v => Math.max(2, Math.min(100, v * 100));
-  return `<div class="measure" aria-label="${name}">
-    <div class="bar"><span>${la}</span><div class="track"><b style="--w:${w(a)}%"></b></div><span>${pct(a)}</span></div>
-    <div class="bar after"><span>${lb}</span><div class="track"><b style="--w:${w(b)}%"></b></div><span>${pct(b)}</span></div></div>`;
-}
 const flipDates = ctx => flip(`Normal: ${day(ctx.a.id)}`, `Flood: ${day(ctx.b.id)}`);
 
 export default {

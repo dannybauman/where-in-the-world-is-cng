@@ -24,6 +24,13 @@ export function bars(name, a, b, la, lb) {
     <div class="bar"><span>${la}</span><div class="track"><b style="--w:${w(a)}%"></b></div><span>${n(a)}</span></div>
     <div class="bar after"><span>${lb}</span><div class="track"><b style="--w:${w(b)}%"></b></div><span>${n(b)}</span></div></div>`;
 }
+export const pct = v => `${Math.round(v * 100)}%`;
+export function pctBars(name, a, b, la, lb) {
+  const w = v => Math.max(2, Math.min(100, v * 100));
+  return `<div class="measure" aria-label="${name}">
+    <div class="bar"><span>${la}</span><div class="track"><b style="--w:${w(a)}%"></b></div><span>${pct(a)}</span></div>
+    <div class="bar after"><span>${lb}</span><div class="track"><b style="--w:${w(b)}%"></b></div><span>${pct(b)}</span></div></div>`;
+}
 export const cover = it => `${n(it.cloud_cover, 0)}% cloud, shows ${n(it.covers_aoi_pct, 0)}% of the lake`;
 
 export const star = ctx => { ctx.stars = (ctx.stars || 0) + 1; };
