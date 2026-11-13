@@ -16,7 +16,7 @@ export default {
         // a big place (a state, a country) gets a box about 30 km wide at its middle, the size one picture shows well
         const [w, s, e, n] = g.bbox;
         const cx = (w + e) / 2, cy = (s + n) / 2, half = Math.min(0.15, Math.max(e - w, n - s) * 0.65 + 0.02);
-        Object.assign(ctx, { box: [cx - half, cy - half, cx + half, cy + half], full: esc(g.name.split(",")[0]) });
+        Object.assign(ctx, { box: [cx - half, cy - half, cx + half, cy + half], full: esc(g.name.split(/[,(]/)[0].trim()) });
         frame(ctx.box);
         ctx.say("Searching for a clear picture…");
         let it;

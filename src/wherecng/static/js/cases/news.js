@@ -11,7 +11,7 @@ export default {
       ask: { label: "Place name", placeholder: "e.g. Portland, Oregon", button: "Check this place", wait: "Finding the place…", run: async name => {
         const g = await geocode(name);
         const [w, s, e, nn] = g.bbox, pad = Math.max(0.05, (e - w) * 0.1);
-        Object.assign(ctx, { box: [w - pad, s - pad, e + pad, nn + pad], name: esc(g.name.split(",")[0]), full: esc(g.name), lat: g.lat, lon: g.lon });
+        Object.assign(ctx, { box: [w - pad, s - pad, e + pad, nn + pad], name: esc(g.name.split(/[,(]/)[0].trim()), full: esc(g.name), lat: g.lat, lon: g.lon });
         frame(ctx.box);
         ctx.say("Checking fires, storms, floods and weather…");
         // weather is a side note: if it doesn't answer, the story goes on without it
