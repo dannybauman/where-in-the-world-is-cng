@@ -16,6 +16,8 @@ from fastapi.responses import FileResponse, JSONResponse
 from fastapi.staticfiles import StaticFiles
 from groundstation import tools
 
+from wherecng.passes import group, ownership
+
 STATIC = Path(__file__).parent / "static"
 app = FastAPI(title="Where in the world is Cloud-Native Geospatial?")
 
@@ -72,18 +74,65 @@ def api_weather(lat: float, lon: float):
 def api_search(w: float, s: float, e: float, n: float, start: str, end: str, max_cloud: float = 20):
     r = tools.search_imagery(
         "earth-search", ["sentinel-2-l2a"], bbox=[w, s, e, n],
-        datetime_range=f"{start}T00:00:00Z/{end}T23:59:59Z", max_cloud_cover=max_cloud, limit=20,
+        datetime_range=f"{start}T00:00:00Z/{end}T23:59:59Z", max_cloud_cover=max_cloud, limit=100,
     )
-    items = sorted(r.get("items", []), key=lambda i: (-(i.get("covers_aoi_pct") or 0), i.get("cloud_cover") or 100))
-    return {"items": items[:12], "error": r.get("error")}
+    passes = group([i for i in r.get("items", []) if i.get("footprint")], [w, s, e, n])
+    passes.sort(key=lambda i: (-i["covers_aoi_pct"], i.get("cloud_cover") or 100))
+    return {"items": passes[:12], "error": r.get("error")}
 
 
 @app.get("/api/stats")
+def api_stats(item: str, expression: str, w: float, s: float, e: float, n: float, tiles: str = ""):
+    ids = [t for t in tiles.split(",") if t]
+    if len(ids) > 8 or not all(re.fullmatch(S2_ID, t) for t in ids):
+        raise HTTPException(400, "unknown scene")
+    if len(ids) < 2:
+        return _stats(item=item, expression=expression, w=w, s=s, e=e, n=n)
+    return _pass_stats(tiles=",".join(ids), expression=expression, w=w, s=s, e=e, n=n)
+
+
 @cached(DAY)
-def api_stats(item: str, expression: str, w: float, s: float, e: float, n: float):
+def _stats(item: str, expression: str, w: float, s: float, e: float, n: float):
     r = tools.compute_statistics("earth-search", "sentinel-2-l2a", item, expression=expression, bbox=[w, s, e, n])
+    return _band(r)
+
+
+def _band(r):
     band = next((v for v in r.values() if isinstance(v, dict) and "mean" in v), None)
     return {"stats": band, "error": None if band else str(r)[:300]}
+
+
+@cached(DAY)
+def _footprint(item: str):
+    with urllib.request.urlopen(EARTH_SEARCH + item, timeout=20) as r:
+        return json.load(r)["geometry"]
+
+
+def _rect(r):
+    x0, y0, x1, y1 = r
+    return [[[x0, y0], [x1, y0], [x1, y1], [x0, y1], [x0, y0]]]
+
+
+@cached(DAY)
+def _pass_stats(tiles: str, expression: str, w: float, s: float, e: float, n: float):
+    """One pass measured as one: each tile counts only the part of the box it owns, then the means are weighted by area and valid pixels"""
+    ids = tiles.split(",")
+    with ThreadPoolExecutor(8) as pool:
+        feet = list(pool.map(lambda t: _footprint(item=t), ids))
+        if any(isinstance(f, JSONResponse) for f in feet):  # _footprint's cached() wrapper hands back a 502 response on failure
+            return {"stats": None, "error": "a tile's outline didn't come back"}
+        owned, cover, share = ownership([w, s, e, n], list(zip(ids, feet)))
+
+        def one(t):
+            feat = {"type": "Feature", "properties": {}, "geometry": {"type": "MultiPolygon", "coordinates": [_rect(r) for r in owned[t]]}}
+            return _band(tools.compute_statistics("earth-search", "sentinel-2-l2a", t, expression=expression, aoi_geojson=feat))["stats"]
+
+        parts = list(pool.map(one, list(owned)))
+    pairs = [(b, share[t] * (100 if b.get("valid_percent") is None else b["valid_percent"]) / 100) for t, b in zip(owned, parts) if b and b.get("mean") is not None]
+    total = sum(x for _, x in pairs)
+    if not total:
+        return {"stats": None, "error": "no valid pixels in any tile"}
+    return {"stats": {"mean": sum(b["mean"] * x for b, x in pairs) / total, "covers_pct": round(cover, 1), "parts": len(pairs)}, "error": None}
 
 
 @app.get("/api/tiles")

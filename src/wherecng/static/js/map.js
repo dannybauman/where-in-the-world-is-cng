@@ -37,15 +37,19 @@ export async function frame(b) {
   map.fitBounds([[b[0], b[1]], [b[2], b[3]]], { padding: pad(), duration: fade() * 4 });
 }
 
-const dropPicture = id => { if (map.getLayer(id)) map.removeLayer(id); if (map.getSource(id)) map.removeSource(id); };
-export async function picture(slot, url) {
+// a slot's layers are pic-a, pic-a-1, pic-a-2 ... one per tile of the pass
+const picIds = slot => (map.getStyle()?.layers || []).map(l => l.id).filter(id => id === "pic-" + slot || id.startsWith("pic-" + slot + "-"));
+const dropPictures = slot => { for (const id of picIds(slot)) { map.removeLayer(id); if (map.getSource(id)) map.removeSource(id); } };
+export async function picture(slot, urls) {
   await ready;
-  const id = "pic-" + slot;
-  dropPicture(id);
+  dropPictures(slot);
   // the free tile service draws only the case box, at zooms where a 10 m pixel can be seen; past 14 the map stretches tiles it has
   const grow = caseBox && Math.max(caseBox[2] - caseBox[0], caseBox[3] - caseBox[1]) * 0.5;
-  map.addSource(id, { type: "raster", tiles: [url.replace(/^https:/, "count:")], tileSize: 256, minzoom: 8, maxzoom: 14, ...(caseBox && { bounds: [caseBox[0] - grow, caseBox[1] - grow, caseBox[2] + grow, caseBox[3] + grow] }), attribution: "Sentinel-2 via Earth Search, drawn by TiTiler" });
-  map.addLayer({ id, type: "raster", source: id, paint: { "raster-opacity-transition": { duration: fade() } } }, map.getLayer("box") ? "box" : undefined);
+  [].concat(urls).forEach((url, k) => {
+    const id = "pic-" + slot + (k ? "-" + k : "");
+    map.addSource(id, { type: "raster", tiles: [url.replace(/^https:/, "count:")], tileSize: 256, minzoom: 8, maxzoom: 14, ...(caseBox && { bounds: [caseBox[0] - grow, caseBox[1] - grow, caseBox[2] + grow, caseBox[3] + grow] }), attribution: "Sentinel-2 via Earth Search, drawn by TiTiler" });
+    map.addLayer({ id, type: "raster", source: id, paint: { "raster-opacity-transition": { duration: fade() } } }, map.getLayer("box") ? "box" : undefined);
+  });
   await settled();
 }
 // resolves once the map has drawn every tile it asked for, so "ready" means the picture is on screen
@@ -97,7 +101,7 @@ export async function flight(from, to) {
 
 // the before/after switch
 export function show(slot) {
-  if (map.getLayer("pic-b")) map.setPaintProperty("pic-b", "raster-opacity", slot === "b" ? 1 : 0);
+  for (const id of picIds("b")) map.setPaintProperty(id, "raster-opacity", slot === "b" ? 1 : 0);
   $("flip-a").setAttribute("aria-pressed", slot === "a");
   $("flip-b").setAttribute("aria-pressed", slot === "b");
 }
@@ -127,7 +131,7 @@ export function mark(lngLat) {
 }
 
 export function resetMap() {
-  dropPicture("pic-a"); dropPicture("pic-b");
+  dropPictures("a"); dropPictures("b");
   disarm(); round++;
   map.getCanvas().onkeydown = null;
   marker?.remove(); marker = null;

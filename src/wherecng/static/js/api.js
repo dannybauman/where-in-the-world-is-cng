@@ -17,9 +17,16 @@ export const iso = d => d.toISOString().slice(0, 10);
 export const day = id => { const m = id.match(/_(\d{4})(\d{2})(\d{2})_/); return m ? new Date(`${m[1]}-${m[2]}-${m[3]}T12:00Z`).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" }) : esc(id); };
 export const WATER = "(green-nir)/(green+nir)", BURN = "(nir-swir22)/(nir+swir22)";
 
-export const search = (b, start, end, cloud = 20) => api(`/api/search?${q({ ...box(b), start, end, max_cloud: cloud })}`);
-export const stats = async (item, ex, b) => { const r = await api(`/api/stats?${q({ item, expression: ex, ...box(b) })}`); if (!r.stats) throw new Error("The measurement didn't come back."); return r.stats.mean; };
-export const tiles = async (item, ex) => (await api(`/api/tiles?${q(ex ? { item, expression: ex } : { item })}`)).tiles;
+// a picture is a satellite pass of several tiles: search() remembers which tiles each pass is made of
+const passTiles = new Map();
+export const search = async (b, start, end, cloud = 20) => {
+  const r = await api(`/api/search?${q({ ...box(b), start, end, max_cloud: cloud })}`);
+  for (const it of r.items || []) passTiles.set(it.id, it.tiles || [it.id]);
+  return r;
+};
+export const stats = async (item, ex, b) => { const t = passTiles.get(item) || [], r = await api(`/api/stats?${q({ item, expression: ex, ...box(b), ...(t.length > 1 && { tiles: t.join(",") }) })}`); if (!r.stats) throw new Error("The measurement didn't come back."); return r.stats.mean; };
+// one tile URL template per tile of the pass; a scene that never came from a search is one tile
+export const tiles = (id, ex) => Promise.all((passTiles.get(id) || [id]).map(item => api(`/api/tiles?${q(ex ? { item, expression: ex } : { item })}`).then(r => r.tiles)));
 // the error text is escaped later, where the step engine shows it
 export async function geocode(name) {
   const g = await api(`/api/geocode?${q({ q: name })}`);

@@ -3,8 +3,8 @@ import { frame, flip } from "../map.js";
 import { best, paint, cover, star } from "../moves.js";
 import { note } from "../notes.js";
 
-// the whole lake (OpenStreetMap bounds), trimmed to tile 11SQA's west edge so one picture covers about 95% of it
-const MEAD = [-114.78, 36.01, -114.1, 36.43];
+// the whole lake (OpenStreetMap bounds); a picture is a whole satellite pass, so its tiles together cover the box
+const MEAD = [-114.84, 36.0, -114.1, 36.43];
 // the shallow north end, where the shoreline moves most
 const OVERTON = [-114.48, 36.3, -114.33, 36.45];
 const BOX_KM2 = (MEAD[2] - MEAD[0]) * 111.32 * Math.cos(((MEAD[1] + MEAD[3]) / 2) * Math.PI / 180) * (MEAD[3] - MEAD[1]) * 110.95;
@@ -31,8 +31,8 @@ export default {
     ctx => ({ title: "A post is going viral", text: `<p>It says Lake Mead, the biggest reservoir in the US, is almost gone. Your editor asks: true?</p><p>Start with the latest summer's pictures.</p>`,
       go: { label: "Search summer 2026", run: async () => {
         await frame(MEAD);
-        // two half-month searches, because one search returns at most 20 pictures and the edge tiles crowd out the full-lake ones
-        const all = (await Promise.all([best(MEAD, "2026-08-01", "2026-08-15", 100), best(MEAD, "2026-08-16", "2026-08-31", 100)])).flat();
+        // one search for the month: a picture is a whole pass (all its tiles joined), so a month is a few dozen at most
+        const all = await best(MEAD, "2026-08-01", "2026-08-31", 100);
         const whole = all.filter(i => i.covers_aoi_pct >= 70).sort((x, y) => x.cloud_cover - y.cloud_cover);
         const good = whole[0];
         if (!good || good.cloud_cover >= 10) throw new Error("No clear picture of the whole lake that summer.");
