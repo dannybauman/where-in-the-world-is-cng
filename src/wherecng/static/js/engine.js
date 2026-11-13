@@ -106,7 +106,8 @@ function lookStep(s, { ctx, body, ctl, next }) {
     b.onclick = async () => {
       [...opts.children].forEach(x => x.setAttribute("aria-pressed", "false"));
       b.setAttribute("aria-pressed", "true"); chosen = o; chosenBtn = b; use.disabled = false;
-      try { await s.look.preview(o); } catch { body.innerHTML = `<p class="wait">That picture didn't load. Try another.</p>`; }
+      body.innerHTML = `<p class="wait" role="status">Loading the picture…</p>`;
+      try { await s.look.preview(o); body.innerHTML = `<p class="tapnote">${s.look.hint}</p>`; } catch { body.innerHTML = `<p class="say wrong">That picture didn't load. Try another.</p>`; }
     };
     opts.appendChild(b);
   });

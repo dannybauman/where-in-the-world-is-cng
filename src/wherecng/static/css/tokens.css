@@ -65,8 +65,8 @@
   --width-bar-value: 3.5rem;
   --width-input-min: 12rem;
   --width-tn-label: 4.5em;
-  --height-map-phone: 45vh;
-  --height-map-phone: 45dvh; /* dvh follows the phone browser's moving address bar; vh above is the fallback */
+  --height-map-phone: 55vh;
+  --height-map-phone: 55dvh; /* dvh follows the phone browser's moving address bar; vh above is the fallback */
   --height-sheet-max: 80vh;
   --height-sheet-max: 80dvh;
 

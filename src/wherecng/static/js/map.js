@@ -27,6 +27,17 @@ maplibregl.addProtocol("count", async (params, abort) => {
 });
 const $ = id => document.getElementById(id);
 
+// a case box sits clear of the top buttons and the before/after switch, so nothing covers the ground being judged
+function clear() {
+  const p = pad(), top = $("home-btn").getBoundingClientRect().bottom - map.getContainer().getBoundingClientRect().top;
+  return { top: top + p / 2, bottom: parseFloat(css("--size-flip-bottom")) + parseFloat(css("--size-touch")) + p / 2, left: p, right: p };
+}
+
+// a picture still drawing after a second says so on the map
+let waitT = null;
+map.on("dataloading", e => { if (!e.sourceId?.startsWith("pic-") || waitT) return; waitT = setTimeout(() => ($("map-wait").hidden = false), 1000); });
+map.on("idle", () => { clearTimeout(waitT); waitT = null; $("map-wait").hidden = true; });
+
 export async function frame(b) {
   caseBox = b;
   await ready;
@@ -34,7 +45,7 @@ export async function frame(b) {
   const gj = { type: "Feature", geometry: { type: "Polygon", coordinates: [ring] } };
   if (map.getSource("box")) map.getSource("box").setData(gj);
   else { map.addSource("box", { type: "geojson", data: gj }); map.addLayer({ id: "box", type: "line", source: "box", paint: { "line-color": css("--color-brand"), "line-width": parseFloat(css("--border-accent")) } }); }
-  map.fitBounds([[b[0], b[1]], [b[2], b[3]]], { padding: pad(), duration: fade() * 4 });
+  map.fitBounds([[b[0], b[1]], [b[2], b[3]]], { padding: clear(), duration: fade() * 4 });
 }
 
 // a slot's layers are pic-a, pic-a-1, pic-a-2 ... one per tile of the pass
@@ -47,7 +58,7 @@ export async function picture(slot, urls) {
   const grow = caseBox && Math.max(caseBox[2] - caseBox[0], caseBox[3] - caseBox[1]) * 0.5;
   [].concat(urls).forEach((url, k) => {
     const id = "pic-" + slot + (k ? "-" + k : "");
-    map.addSource(id, { type: "raster", tiles: [url.replace(/^https:/, "count:")], tileSize: 256, minzoom: 8, maxzoom: 14, ...(caseBox && { bounds: [caseBox[0] - grow, caseBox[1] - grow, caseBox[2] + grow, caseBox[3] + grow] }), attribution: "Sentinel-2 via Earth Search, drawn by TiTiler" });
+    map.addSource(id, { type: "raster", tiles: [url.replace(/^https:/, "count:")], tileSize: 256, minzoom: 8, maxzoom: 14, ...(caseBox && { bounds: [caseBox[0] - grow, caseBox[1] - grow, caseBox[2] + grow, caseBox[3] + grow] }), attribution: url.includes("planetarycomputer") ? "Sentinel-1 radar via Microsoft Planetary Computer" : "Sentinel-2 via Earth Search, drawn by TiTiler" });
     map.addLayer({ id, type: "raster", source: id, paint: { "raster-opacity-transition": { duration: fade() } } }, map.getLayer("box") ? "box" : undefined);
   });
   await settled();

@@ -35,7 +35,7 @@ export function home() {
   const firstDone = "first" in save.stars;
   $("view").innerHTML = `<div class="intro"><h1>Solve mysteries with pictures from space</h1>
     <p>Free satellite pictures of real places. No experience needed.</p></div>
-    ${firstDone ? rankCard() + mysteryCard(true) : ""}
+    ${firstDone ? rankCard() : ""}
     <h2 class="path-title">Cases</h2>
     <ol class="path">${CASES.map((c, i) => {
       const done = c.id in save.stars, prevDone = i === 0 || CASES[i - 1].id in save.stars, open = done || prevDone;
@@ -44,7 +44,7 @@ export function home() {
         <button class="case" type="button" data-i="${i}" ${open ? "" : "disabled"}><span class="who">${tag}</span>
         <h3>${c.title}</h3><p>${open ? c.blurb : `Opens after ${CASES[i - 1].title}.`}</p>${open ? starRow(save.stars[c.id] || 0, c.maxStars) : ""}</button></li>`;
     }).join("")}</ol>
-    ${firstDone ? "" : mysteryCard(false)}`;
+    ${mysteryCard(firstDone)}`;
   $("view").querySelectorAll(".case:not([disabled])").forEach(b => (b.onclick = () => start(CASES[+b.dataset.i], home, opensAfter(+b.dataset.i))));
   if (!firstDone) return;
   const t = todayIndex(), img = $("view").querySelector(".mcard img");

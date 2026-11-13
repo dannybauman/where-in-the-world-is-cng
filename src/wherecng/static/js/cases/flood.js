@@ -32,7 +32,7 @@ export default {
         { text: "Use radar", right: true, why: "Radar sends its own signal and sees through cloud." },
         { text: "Zoom in", right: false, why: "Closer clouds are still clouds." },
       ], then: async () => note("radar") } }),
-    ctx => ({ title: "Radar, before and during", text: `<p>In radar, calm water is black. Roofs and streets bounce the signal back bright.</p><p>Flip to see the new black.</p>`,
+    ctx => ({ title: "Radar, before and during", text: `<p>In radar, calm water is black. Roofs and streets bounce the signal back bright.</p>`,
       go: { label: "Get radar, before and during", run: async () => {
         const [a, b] = await Promise.all([best(FLOOD, "2021-12-05", "2021-12-15", 100, true), best(FLOOD, "2024-05-05", "2024-05-12", 100, true)]);
         ctx.a = a[0]; ctx.b = b[0];
