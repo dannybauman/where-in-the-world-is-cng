@@ -98,25 +98,22 @@ Use-case themes behind this, ranked (from Danny's DevSeed notes, 2026-11-12): fo
 
 Danny, 2026-11-12: "make it better ... better actual game content, onboarding, and story. better design, better UX, better gameplay, better polish, better smooth progression from easy/new to more challenging/replay-value, reduce complications and use simple concise language". Done as one designed pass in the slices below, each its own commit, not a run of patches.
 
-The calls (made 2026-11-12, Danny's "your call"):
-- **Story.** You run a small desk that answers questions with free pictures from space. Each case is one person's question (a neighbor, a reporter, a fire chief), opened in their words and closed with your answer to them. The cheeky cloud stays the only trickster. No chase plot, no borrowed characters.
-- **Onboarding.** The first screen is one action: "Type a place you know." That is First Look's first step, so the game starts by playing. Nothing locked shows until it is close: the path shows the next case, not a wall of locks.
-- **Progression.** The mystery places get 3 tiers. Easy: Manhattan, the Nile, Mount Fuji, Venice. Medium: Palm Jumeirah, the Grand Canyon, the Mississippi delta, Rondônia. Hard: the Richat Structure, Al Jawf, the Exuma Cays, the Afsluitdijk. A tier opens after 6 stars in the tier before it. Today's mystery comes from the highest open tier.
-- **Replay.** A daily streak on today's mystery, and 12 more places (4 per tier) picked with the same rules as the first 12.
-- **Gameplay.** Fewer clues used means a small bonus: solve on clue 1 with a 3-star guess and it shows "Sharp eye". A badge, not a new score.
-- **Cases.** The Forest case replaces The Vanishing Lake once INPE DETER gives a clearing. Until then, the Lake case stays.
+**The main goal (Danny, 2026-11-12, correcting the first draft of this plan):** "it was much better having it walk through real live historical events and changes and seeing different images and layers and seeing the actual problems needing solving and how imagery and geo data can help, and calculating changes, all the is the main goal. the "guess where" stuff is a nice quick intro or something to come back to sometimes". So the cases carry the game. The mystery round is a warm-up and a side pocket, and gets no new machinery in this pass.
+
+The calls (made 2026-11-12, Danny's "your call" on the rest):
+- **Cases are the game.** Each case is a real event or change, with a real problem someone had to solve. The player looks at more than one picture and more than one layer (true color, infrared, an index, a live feed), measures the change with a number, and uses it to decide something. Depth over count.
+- **Story.** Each case opens with the real problem in one or two lines (who needed to know what, and when) and closes with what the player found and what it means for them. No chase plot, no borrowed characters; the cheeky cloud stays the only trickster.
+- **Progression.** Cases go from one picture, to two dates, to an index, to measuring change over an area, to combining layers (radar, embeddings, live feeds). Replay comes from new real events and from cases with more than one place to investigate, not from scores alone.
+- **Mystery round.** Stays as the quick intro after First Look and a thing to come back to. No tiers, streaks or new places this pass.
 - **Language and design.** One copy sweep over every screen (one idea per sentence, buttons say what happens), then one design pass with the frontend-design checklist, checked at 390 px and 1280 px.
 
 Slices, in order (each about 15 minutes, each shown in Danny's window before the next):
-1. A fresh-eyes playthrough by a helper, start to finish, listing every friction point in plain words. It grounds the rest; the slices below change if it finds something bigger.
-2. Copy sweep.
-3. Onboarding: start by playing.
-4. Story frame: the asker's line at the start and end of each case.
-5. Mystery tiers and the daily streak.
-6. Sharp eye badge.
-7. 12 more places.
-8. Design and polish pass.
-9. Forest case (needs the DETER clearing).
+1. A fresh-eyes playthrough by a helper, start to finish, listing every friction point in plain words, with the most weight on the cases. It grounds the rest; the slices below change if it finds something bigger.
+2. Deepen After the Fire: add "what grew back" (a later date, the same index, the change measured).
+3. Deepen The Vanishing Lake into a real multi-year story (the water index over several years, checked against the measured lake level), or replace it with the Forest case once INPE DETER gives a clearing.
+4. A new case from the ranked themes: flood through clouds with radar (probe radar access first).
+5. Copy sweep and story lines across all cases.
+6. Design and polish pass.
 
 ## How it is built
 
