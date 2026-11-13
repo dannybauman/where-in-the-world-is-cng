@@ -7,7 +7,7 @@ const GORGE = [-122.05, 45.55, -121.75, 45.72];
 const flipDates = ctx => flip(`Before: ${day(ctx.a.id)}`, `After: ${day(ctx.b.id)}`);
 
 export default {
-  id: "fire", who: "Responder", title: "After the Fire", maxStars: 3,
+  id: "fire", who: "Responder", title: "After the Fire", maxStars: 4,
   blurb: "A 2017 wildfire burned in Oregon's Columbia River Gorge. Find where, and send crews.",
   steps: [
     ctx => ({ title: "The gorge is burning", text: `<p>September 2017. A wildfire burns for weeks in the Columbia River Gorge. You lead recovery: where did it burn, and how badly?</p><p>Start with a picture from just before the fire and one from just after.</p>`,
@@ -49,6 +49,21 @@ export default {
         { text: `Satellite data shows a ${ctx.drop}% drop in plant health across the area, mostly south of the river. Crews will confirm.`, right: true, why: "What you found, how you know, and what's still unsure." },
         { text: "The fire caused flooding.", right: false, why: "Nothing you measured is about flooding." },
       ], then: async () => note("honest") } }),
+    ctx => ({ title: "Years later", text: `<p>The gorge reopened. Did the forest come back? Look at the same time of year, five years on.</p>`,
+      go: { label: "Show 2022", wait: "Measuring every pixel…", run: async () => {
+        ctx.c = (await best(GORGE, "2022-08-20", "2022-08-31", 10))[0];
+        await paint("a", ctx.b.id, BURN); await paint("b", ctx.c.id, BURN);
+        flip(`Just after: ${day(ctx.b.id)}`, `2022: ${day(ctx.c.id)}`);
+        ctx.mc = await stats(ctx.c.id, BURN, GORGE);
+        ctx.gap = Math.round(((ctx.ma - ctx.mc) / ctx.ma) * 100);
+        return `<p>Flip between them. Some red turned green.</p>${bars("Burn score, same time of year", ctx.ma, ctx.mc, "2017, before", "2022")}<p>Plants are coming back. The area is still ${ctx.gap}% below where it was before the fire.</p>`;
+      } } }),
+    ctx => ({ title: "Where to replant", text: `<p>Tap a spot that is still burned in 2022. Red is burned. Crews will plant there first.</p>`,
+      tap: { run: async spot => {
+        const [a, c] = await Promise.all([stats(ctx.a.id, BURN, spot), stats(ctx.c.id, BURN, spot)]);
+        const bare = c < 0.3 && a - c > 0.15; if (bare) star(ctx);
+        return `${bars("Burn score at your spot", a, c, "Before", "2022")}<div class="say ${bare ? "" : "wrong"}">${bare ? "Good call. That spot burned in 2017 and is still bare." : "That spot looks green again, or it never burned. Look for the patches that are still red."}</div>`;
+      } } }),
   ],
-  file: c => `Question: Where did the 2017 Eagle Creek fire burn?\nFinding: Burn score fell ${c.drop}% across the area (${n(c.ma)} to ${n(c.mb)}), mostly south of the river.\nEvidence: Sentinel-2 pictures from ${day(c.a.id)} and ${day(c.b.id)}.\nLimits: a score, not a damage survey. Crews confirm on the ground.`,
+  file: c => `Question: Where did the 2017 Eagle Creek fire burn?\nFinding: Burn score fell ${c.drop}% across the area (${n(c.ma)} to ${n(c.mb)}), mostly south of the river.\nEvidence: Sentinel-2 pictures from ${day(c.a.id)} and ${day(c.b.id)}.\nRecovery: by 2022 the burn score was still ${c.gap}% below its level before the fire, at the same time of year.\nLimits: a score, not a damage survey. Crews confirm on the ground.`,
 };
