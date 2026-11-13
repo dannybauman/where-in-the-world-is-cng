@@ -32,7 +32,7 @@ export default {
         const all = await best(MEAD, "2026-07-01", "2026-08-31", 90);
         const good = all.find(i => i.cloud_cover < 10 && i.covers_aoi_pct >= 70);
         if (!good) throw new Error("No clear picture of the whole lake that summer.");
-        const part = all.find(i => i.cloud_cover < 20 && i.covers_aoi_pct < 50);
+        const part = all.find(i => i.cloud_cover < 20 && i.covers_aoi_pct < 50 && day(i.id) !== day(good.id));
         const cloudy = all.find(i => i.cloud_cover >= 40);
         ctx.good = good; ctx.list = [part, good, cloudy].filter(Boolean);
         return `<p>Found ${all.length} pictures. Here are ${ctx.list.length} of them.</p>${note("stac")}`;
@@ -42,7 +42,7 @@ export default {
         hint: "Pick the one you trust most.",
         options: ctx.list.map((it, k) => ({ it, text: `Picture ${k + 1}, ${day(it.id)}`, right: it === ctx.good,
           reveal: cover(it),
-          why: it === ctx.good ? "No clouds, and it shows most of the lake." : it.cloud_cover >= 40 ? "Clouds hide the water. You can't measure what you can't see." : "It's clear, but it misses part of the lake. Half a lake is half the evidence." })),
+          why: it === ctx.good ? "No clouds, and it shows most of the lake." : it.cloud_cover >= 40 ? "Clouds hide the water. You can't measure what you can't see." : "It's clear, but it only shows a strip of the lake. You can't measure what isn't in the picture." })),
         preview: o => paint("a", o.it.id),
         then: async () => { ctx.b = ctx.good; await paint("b", ctx.good.id); return note("clouds"); },
       } }),
