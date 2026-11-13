@@ -121,6 +121,14 @@ Slices, in order (each about 15 minutes, each shown in Danny's window before the
 
 Next case, planned 2026-11-13 (Danny: extreme events, as a detective case): **"Who Did It?"** A claim blames the wrong kind of event; the player reads the mark it left (how wide, how long, where it sits), rules suspects out and names the real one. 3 or 4 scenes, the other kinds as line-up cards. A tsunami is not weather, and the case says so. Pictures looked at so far, clear in true color: tornado (Bassfield/Soso MS, Apr 2020, a straight brown band 1 to 2 km wide through forest), hurricane (Maria over Dominica 2017; Ian over Sanibel 2022), monsoon flood (Manchar Lake, Sindh 2022), flash flood (Derna, Libya 2023). Too faint at this resolution: tsunami, derecho, hail swath, dust storm, glacial lake outburst; those are line-up cards unless a better picture turns up. Boxes and scene ids: `docs/who-did-it-pictures.md`.
 
+The bar for this case (Danny, 2026-11-13): "make sure it's utilizing CNG well with Groundstation, showcasing what we've been trying to showcase, not just general weather info. but still compelling and understandable real world scenarios". So every verdict comes from something the player does with the open data, never from a fact about weather:
+- Each scene is a real event with a real person who needed the answer (an insurer, a county planner, an aid team).
+- The player searches the catalog by place and date (STAC), flips before and after, and measures the mark with a Groundstation tool: its width and length, the area that changed, the plant health or water score.
+- Time is evidence too: one search shows how long the mark lasts. Monsoon water stays for weeks; a flash flood is gone in days and leaves mud. Reading 3 dates costs seconds because a COG is read in pieces.
+- At least one scene needs a second layer to settle it (radar through cloud, or an index), and one checks the picture against the event feed's own record.
+- A line-up card states a mark only if a picture in the game shows it, or says plainly that this resolution can't show it.
+- The case closes with the same trust block and a case file that names its limits.
+
 Playthrough (slice 1, 2026-11-12): First Look, Lake, Fire and Right Now plus the mystery round at 1280 px, First Look and Fire at 390 px. Fire is the strongest case. The place-name bug ("Portland (US is totally safe") was fixed on the spot.
 
 ## How it is built
