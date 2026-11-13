@@ -169,6 +169,11 @@
   .wait::before { content: ""; display: inline-block; width: var(--size-pulse); height: var(--size-pulse); margin-right: var(--space-2); border-radius: 50%; background: var(--color-accent); animation: pulse var(--motion-pulse) ease-in-out infinite; }
   @keyframes pulse { 50% { opacity: var(--opacity-pulse-low); transform: scale(var(--pulse-to)); } }
   @media (prefers-reduced-motion: reduce) { .wait::before { animation: none; } }
+  .top .stars { font-size: var(--step--1); white-space: nowrap; }
+  .rule { font-size: var(--step--1); color: var(--color-ink-soft); }
+  .found { margin-top: var(--space-4); }
+  .found p + p { margin-top: var(--space-3); }
+  .found b { display: block; font-size: var(--step--1); color: var(--color-ink-soft); }
   .tapnote { margin-top: var(--space-4); font-weight: var(--weight-medium); color: var(--color-accent-ink); }
 
   /* a measurement: 2 bars on the same scale */

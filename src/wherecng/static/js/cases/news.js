@@ -1,6 +1,6 @@
 import { api, q, esc, box, n, day, iso, geocode, stats, BURN } from "../api.js";
 import { frame, flip, flight } from "../map.js";
-import { best, paint, bars, star } from "../moves.js";
+import { best, paint, bars } from "../moves.js";
 import { note } from "../notes.js";
 
 const WORLD = [-180, -90, 180, 90];
@@ -67,8 +67,8 @@ export default {
     ctx => ctx.fire ? ({ title: "Find the scar", text: `<p>Tap the spot that burned. Readers will want a number.</p>`,
       tap: { run: async spot => {
         const [a, b] = await Promise.all([stats(ctx.a.id, BURN, spot), stats(ctx.b.id, BURN, spot)]);
-        const burned = a - b > 0.15; if (burned) { star(ctx); ctx.drop = a - b; }
-        return `${bars("Burn score at your spot", a, b, "Before", "After")}<div class="say ${burned ? "" : "wrong"}">${burned ? "That's the scar. The burn score fell sharply there." : "That spot barely changed. Look for red that wasn't there before."}</div>`;
+        const burned = a - b > 0.15; if (burned) ctx.drop = a - b;
+        return { right: burned, html: `${bars("Burn score at your spot", a, b, "Before", "After")}<div class="say ${burned ? "" : "wrong"}">${burned ? "That's the scar. The burn score fell sharply there." : "That spot barely changed. Look for red that wasn't there before."}</div>` };
       } } }) : null,
     ctx => {
       const f = ctx.fire;
@@ -81,5 +81,9 @@ export default {
       ], then: async () => { ctx.headline = `${fact}, ${src}`; return note("honest"); } } };
     },
   ],
+  found: c => c.fire
+    ? [`A fresh burn scar at ${place(c.fire)}, ${Math.round(c.fire.km).toLocaleString("en-US")} km from ${c.name}, seen from space.`,
+      "A feed says something happened. A picture shows how big it was. Together they make a headline you can stand behind."]
+    : [`No fire this month had a clear picture yet.`, "An empty result is a finding too. Say what you checked, and check again in a few days."],
   file: c => `Headline: ${c.headline}\nNear ${c.name}: ${c.near.length ? c.near.slice(0, 4).map(x => x.title).join("; ") : "nothing listed within 300 km"} (NASA EONET and GDACS, 30 days).${c.weather ? ` ${c.weather} (Open-Meteo).` : ""}\n${c.fire ? `Fire: ${c.fire.title}, ${Math.round(c.fire.km)} km away. Sentinel-2 ${day(c.a.id)} and ${day(c.b.id)}.${c.drop ? ` Burn score fell ${n(c.drop)} at the scar.` : ""}` : "No fire with a clear picture this month."}\nLimits: feeds list reported events only; a burn score is not a damage survey.`,
 };

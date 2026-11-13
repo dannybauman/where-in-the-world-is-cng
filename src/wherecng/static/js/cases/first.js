@@ -58,5 +58,7 @@ export default {
       };
     } }),
   ],
+  found: c => [`${c.full} from space, in a picture taken ${c.scene}${c.secs ? `, about ${c.secs} seconds after you asked` : ""}.`,
+    "Free pictures of anywhere on Earth are one search away. The cases ahead use them to answer real questions."],
   file: c => `Place: ${c.full}\nPicture: Sentinel-2, taken ${c.scene}. Free and open.${c.read ? `\nRead: ${size(c.read)} of a ${size(c.whole)} scene.` : ""}`,
 };

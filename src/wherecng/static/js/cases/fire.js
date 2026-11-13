@@ -1,6 +1,6 @@
 import { day, n, stats, BURN } from "../api.js";
 import { frame, flip } from "../map.js";
-import { best, paint, bars, star } from "../moves.js";
+import { best, paint, bars } from "../moves.js";
 import { note } from "../notes.js";
 
 const GORGE = [-122.05, 45.55, -121.75, 45.72];
@@ -61,9 +61,11 @@ export default {
     ctx => ({ title: "Where to replant", text: `<p>Tap a spot that is still burned in 2022. Red is burned. Crews will plant there first.</p>`,
       tap: { run: async spot => {
         const [a, c] = await Promise.all([stats(ctx.a.id, BURN, spot), stats(ctx.c.id, BURN, spot)]);
-        const bare = c < 0.3 && a - c > 0.15; if (bare) star(ctx);
-        return `${bars("Burn score at your spot", a, c, "Before", "2022")}<div class="say ${bare ? "" : "wrong"}">${bare ? "Good call. That spot burned in 2017 and is still bare." : "That spot looks green again, or it never burned. Look for the patches that are still red."}</div>`;
+        const bare = c < 0.3 && a - c > 0.15;
+        return { right: bare, html: `${bars("Burn score at your spot", a, c, "Before", "2022")}<div class="say ${bare ? "" : "wrong"}">${bare ? "Good call. That spot burned in 2017 and is still bare." : "That spot looks green again, or it never burned. Look for the patches that are still red."}</div>` };
       } } }),
   ],
+  found: c => [`The fire cut plant health ${c.drop}% across the gorge. By 2022 the area was still ${c.gap}% below where it started.`,
+    "Infrared shows a burn the eye misses. The same score, years later, shows crews where to replant."],
   file: c => `Question: Where did the 2017 Eagle Creek fire burn?\nFinding: Burn score fell ${c.drop}% across the area (${n(c.ma)} to ${n(c.mb)}), mostly south of the river.\nEvidence: Sentinel-2 pictures from ${day(c.a.id)} and ${day(c.b.id)}.\nRecovery: by 2022 the burn score was still ${c.gap}% below its level before the fire, at the same time of year.\nLimits: a score, not a damage survey. Crews confirm on the ground.`,
 };

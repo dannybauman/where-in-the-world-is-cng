@@ -1,6 +1,6 @@
 import { day, n, stats, RADAR_WATER } from "../api.js";
 import { frame, flip, show } from "../map.js";
-import { best, paint, star, pct, pctBars } from "../moves.js";
+import { best, paint, pct, pctBars } from "../moves.js";
 import { note } from "../notes.js";
 
 // north Porto Alegre: the Salgado Filho airport, Sarandi, Humaita
@@ -22,6 +22,7 @@ export default {
         const byDate = [...all].sort((x, y) => x.datetime.localeCompare(y.datetime));
         ctx.opt = byDate.at(-1);
         const [now, last] = await Promise.all([ctx.opt, byDate[0]].map(it => stats(it.id, "scl>=8", FLOOD)));
+        ctx.cloud = now;
         await paint("b", ctx.opt.id); show("b");
         return `<p>${pct(now)} cloud over your area. The last clear look was ${day(byDate[0].id)} (${pct(last)} cloud). Since then, clouds.</p>${note("clouds")}`;
       } } }),
@@ -42,8 +43,8 @@ export default {
     ctx => ({ title: "Send the first boat", text: `<p>Tap where you'd send the first boat: a spot that is dark in the flood picture.</p>`,
       tap: { run: async spot => {
         const [a, b] = await Promise.all([stats(ctx.a.id, RADAR_WATER, spot), stats(ctx.b.id, RADAR_WATER, spot)]);
-        const wet = b >= 0.5 && a < 0.2; if (wet) star(ctx);
-        return `${pctBars("Water at your spot", a, b, "Normal", "Flood")}<div class="say ${wet ? "" : "wrong"}">${wet ? "Good call. That spot was dry and is now under water." : "That spot looks dry in both. Look for new black around the airport and the streets east of the river."}</div>`;
+        const wet = b >= 0.5 && a < 0.2;
+        return { right: wet, html: `${pctBars("Water at your spot", a, b, "Normal", "Flood")}<div class="say ${wet ? "" : "wrong"}">${wet ? "Good call. That spot was dry and is now under water." : "That spot isn't new water. Look for new black around the airport and the streets east of the river."}</div>` };
       } } }),
     ctx => ({ title: "Measure the flooded area", text: `<p>Now one number for the rescue center: how much of the box is under water.</p>`,
       go: { label: "Measure the flooded area", wait: "Counting water pixels…", run: async () => {
@@ -58,5 +59,7 @@ export default {
         { text: "The rain has stopped, so the danger is over.", right: false, why: "Nothing you measured says that." },
       ], then: async () => note("honest") } }),
   ],
-  file: c => `Question: Which parts of north Porto Alegre were under water in the May 2024 flood?\nFinding: About ${km(c.kb)} km² of the box was under water, up from ${km(c.ka)} km² in a normal week (${pct(c.fb)} of the box, up from ${pct(c.fa)}).\nEvidence: Sentinel-1 radar from ${day(c.a.id)} and ${day(c.b.id)}. The optical pictures that week were ${n(c.least, 0)}% to ${n(c.opt.cloud_cover, 0)}% cloud.\nLimits: one box and one radar pass. Smooth surfaces like runways can look like water. Radar can miss water under trees or between tall buildings.`,
+  found: c => [`About ${km(c.kb)} km² of north Porto Alegre was under water on ${day(c.b.id)}, under ${pct(c.cloud)} cloud.`,
+    "When clouds hide a disaster, radar still sees it. Rescue teams can plan from it that same day."],
+  file: c => `Question: Which parts of north Porto Alegre were under water in the May 2024 flood?\nFinding: About ${km(c.kb)} km² of the box was under water, up from ${km(c.ka)} km² in a normal week (${pct(c.fb)} of the box, up from ${pct(c.fa)}).\nEvidence: Sentinel-1 radar from ${day(c.a.id)} and ${day(c.b.id)}. The camera's picture from ${day(c.opt.id)} was ${pct(c.cloud)} cloud over the box.\nLimits: one box and one radar pass. Smooth surfaces like runways can look like water. Radar can miss water under trees or between tall buildings.`,
 };

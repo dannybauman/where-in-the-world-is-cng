@@ -61,7 +61,7 @@ export default {
       } } }),
     () => ({ title: "Your hunch?", text: `<p>Flip between 2020 and 2026 a few times. Compared to 2020, the lake is…</p>`,
       guess: { options: [{ key: "gone", text: "Almost gone" }, { key: "less", text: "Smaller, but far from gone" }, { key: "same", text: "About the same" }] } }),
-    ctx => ({ title: "Measure the water", text: `<p>Eyes can fool you. For every pixel, a water score uses infrared to say water or not water. Count the water pixels and you get the lake's area in square km.</p>`,
+    ctx => ({ title: "Measure the water", text: `<p>Eyes can fool you. A water score uses infrared to mark each pixel as water or not. Count the water pixels and you get the lake's area in square km.</p>`,
       go: { label: "Measure the water", wait: "Counting water pixels…", run: async () => {
         await frame(MEAD);
         const [fa, fc, fb] = await Promise.all([ctx.a, ctx.c, ctx.b].map(it => stats(it.id, IS_WATER, MEAD)));
@@ -87,5 +87,7 @@ export default {
         { text: "The lake is the cleanest it has ever been.", right: false, why: "Nothing you measured is about water quality." },
       ], then: async () => note("honest") } }),
   ],
+  found: c => [`Lake Mead's water area is ${c.drop}% smaller than in ${c.rows[0].year}, and the official level is down ${ft(c.ftDrop)}.`,
+    c.verdict === "gone" ? "The post holds up. The pictures and the official level agree." : "The post is wrong. The lake is low, not gone. A picture plus a measurement on the ground settles what a picture alone can't."],
   file: c => `Claim: Lake Mead is almost gone.\nFinding: Not supported. The lake is low. Its water area in the box fell ${c.drop}% from ${year(c.a)} to ${year(c.b)} (${km(c.rows[0].km2)} to ${km(c.rows[2].km2)} km²), and the official level fell ${ft(c.ftDrop)}.\nEvidence: Sentinel-2 pictures from ${day(c.a.id)}, ${day(c.c.id)} and ${day(c.b.id)}. Official end-of-month levels from the US Bureau of Reclamation: ${c.rows.map(r => `${r.year} ${ft(level(r.it))}`).join(", ")}.\nLimits: one box over the main body of the lake, 3 days, and a water score that can miss muddy or shallow water. Areas are for the box, not the whole lake.`,
 };
