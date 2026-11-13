@@ -24,6 +24,8 @@ export const search = async (b, start, end, cloud = 20, radar = false) => {
   for (const it of r.items || []) passTiles.set(it.id, it.tiles || [it.id]);
   return r;
 };
+// the first tile of a picture, for a link to its catalog item
+export const firstTile = id => (passTiles.get(id) || [id])[0];
 export const stats = async (item, ex, b) => { const t = passTiles.get(item) || [], r = await api(`/api/stats?${q({ item, expression: ex, ...box(b), ...(t.length > 1 && { tiles: t.join(",") }) })}`); if (!r.stats) throw new Error("The measurement didn't come back."); return r.stats.mean; };
 // one tile URL template per tile of the pass; a scene that never came from a search is one tile
 export const tiles = (id, ex) => Promise.all((passTiles.get(id) || [id]).map(item => api(`/api/tiles?${q(ex ? { item, expression: ex } : { item })}`).then(r => r.tiles)));

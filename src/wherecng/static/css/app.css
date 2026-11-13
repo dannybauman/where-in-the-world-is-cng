@@ -177,7 +177,12 @@
   .rule { font-size: var(--step--1); color: var(--color-ink-soft); }
   .found { margin-top: var(--space-4); }
   .found p + p { margin-top: var(--space-3); }
-  .found b { display: block; font-size: var(--step--1); color: var(--color-ink-soft); }
+  .trust { margin-top: var(--space-6); padding: var(--space-3) var(--space-4); border-left: var(--border-accent) solid var(--color-accent); background: var(--color-accent-wash); border-radius: 0 var(--radius) var(--radius) 0; }
+  .trust h3 { font-size: var(--step-1); margin-bottom: var(--space-2); }
+  .trust p + p { margin-top: var(--space-3); }
+  .trust p { overflow-wrap: anywhere; }
+  .recent { margin-top: var(--space-4); }
+  .found b, .trust b, .recent b { display: block; font-size: var(--step--1); color: var(--color-ink-soft); }
   .tapnote { margin-top: var(--space-4); font-weight: var(--weight-medium); color: var(--color-accent-ink); }
 
   /* a measurement: 2 bars on the same scale */

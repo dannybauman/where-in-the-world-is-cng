@@ -1,5 +1,5 @@
 // moves that more than one case makes
-import { search, tiles, iso, n } from "./api.js";
+import { search, tiles, iso, n, firstTile } from "./api.js";
 import { picture } from "./map.js";
 import { rank } from "./save.js";
 
@@ -41,3 +41,21 @@ export function rankLine(before) {
     <span>${now.next ? `${now.need} more ${now.need === 1 ? "star" : "stars"} to ${now.next}` : "Top rank. Every place is still yours to replay."}</span></div>`;
 }
 export const starRow = (got, of) => `<span class="stars" aria-label="${got} of ${of} stars">${"★".repeat(got)}<span class="off">${"★".repeat(of - got)}</span></span>`;
+
+// "Why you can trust this" on the Case closed screen, derived from the case's pics, ground and also
+const ES = "https://earth-search.aws.element84.com/v1/collections/sentinel-2-l2a/items/";
+const PC = "https://planetarycomputer.microsoft.com/api/stac/v1/collections/sentinel-1-rtc/items/";
+export function trust(c, ctx) {
+  const pics = (c.pics?.(ctx) || []).filter(p => p[1]);
+  if (!pics.length) return "";
+  const rad = pics.filter(p => p[1].startsWith("S1")).length, opt = pics.length - rad;
+  const made = `The European Union's Copernicus program flies the ${rad && opt ? "Sentinel-1 radar and Sentinel-2 camera satellites" : rad ? "Sentinel-1 radar satellites" : "Sentinel-2 satellites"} and gives every picture away.`;
+  const cat = [opt && "Earth Search", rad && "Planetary Computer"].filter(Boolean).join(" and ");
+  const ground = c.ground?.(ctx);
+  const links = pics.map(([label, id]) => `<a href="${(id.startsWith("S1") ? PC : ES) + firstTile(id)}" target="_blank" rel="noopener">${label}</a>`).join(", ");
+  return `<div class="trust"><h3>Why you can trust this</h3>
+    <p><b>Who made it</b>${made}${c.also ? ` ${c.also}` : ""}</p>
+    <p><b>How it reached you</b>${rad && opt ? "Public STAC catalogs" : "A public STAC catalog"} (${cat}) found the pictures. Each one is a COG, a file a map can read in pieces. TiTiler read only the pieces you looked at.</p>
+    <p><b>Why it holds up</b>Public and free. Everyone gets the same file, so anyone can repeat your steps. ${ground ? `${ground} ` : ""}The limits are in your case file.</p>
+    <p><b>Check it yourself</b>${links}</p></div>`;
+}

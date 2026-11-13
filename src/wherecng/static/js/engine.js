@@ -5,7 +5,7 @@ import { esc } from "./api.js";
 import { play, card } from "./thennow.js";
 import { note } from "./notes.js";
 import { resetMap, armTap, mark, show } from "./map.js";
-import { star, starRow, rankLine } from "./moves.js";
+import { star, starRow, rankLine, trust } from "./moves.js";
 import { save, persist, rank } from "./save.js";
 
 const $ = id => document.getElementById(id);
@@ -79,14 +79,16 @@ function pickStep(s, { ctx, body, next }) {
   const p = s.pick || s.guess;
   const opts = el(`<div class="options" role="group" aria-label="Answers"></div>`);
   let tries = 0;
-  p.options.forEach(o => {
+  // a pick's right answer is not always in the middle; a guess keeps its order
+  const list = s.pick ? [...p.options].sort(() => Math.random() - .5) : p.options;
+  list.forEach(o => {
     const b = el(`<button class="opt" type="button">${o.text}</button>`);
     b.onclick = async () => {
       if (s.guess) { [...opts.children].forEach(x => (x.disabled = true)); b.classList.add("right"); ctx.guess = o.key; body.innerHTML = `<div class="say">Noted. Let's find out.</div>`; return next(); }
       tries++; b.disabled = true; b.classList.add(o.right ? "right" : "wrong");
       if (!o.right && tries === 1) { body.innerHTML = `<div class="say wrong">Not quite. ${o.why} One more try.</div>`; return; }
       [...opts.children].forEach(x => (x.disabled = true));
-      if (!o.right) opts.children[p.options.findIndex(x => x.right)].classList.add("right");
+      if (!o.right) opts.children[list.findIndex(x => x.right)].classList.add("right");
       if (o.right && tries === 1) star(ctx);
       body.innerHTML = `<div class="say ${o.right ? "" : "wrong"}">${o.right ? (tries === 1 ? "Good call. " : "That's it. ") : "Not quite. "}${o.why}</div>${p.then ? await p.then(ctx) : ""}`;
       next();
@@ -137,7 +139,11 @@ function flipStep(s, { ctx, body, next, run: mine, i }) {
   body.innerHTML = `<p class="tapnote">${s.flipTask}</p>`;
   $("flip-a").addEventListener("click", () => {
     if (run !== mine || run.i !== i) return;
-    star(ctx); body.innerHTML = `<div class="say">That's the switch. Tap "From space" to bring the picture back.</div>`; next();
+    body.innerHTML = `<div class="say">That's the switch. Now tap "From space" to bring the picture back.</div>`;
+    $("flip-b").addEventListener("click", () => {
+      if (run !== mine || run.i !== i) return;
+      star(ctx); body.innerHTML = `<div class="say">Now you can flip any time.</div>`; next();
+    }, { once: true });
   }, { once: true });
 }
 
@@ -168,7 +174,7 @@ async function thenStep(s, { ctx, body, ctl, next, run: mine, i }) {
   if (!still()) return;
   await play(body, ctl, spec);
   if (!still()) return;
-  body.insertAdjacentHTML("beforeend", card(spec) + (spec.note ? note(spec.note) : ""));
+  body.insertAdjacentHTML("beforeend", card(spec) + (spec.after || "") + (spec.note ? note(spec.note) : "") + (spec.notes || []).map(note).join(""));
   next();
 }
 
@@ -187,6 +193,7 @@ function finish() {
     ${rankLine(before)}
     ${opens && !wasDone ? `<p class="opens">Now open: ${opens}.</p>` : ""}
     <div class="row"><button class="btn" id="back" type="button">Back to cases</button></div>
+    ${trust(c, ctx)}
     <h3 class="file-title">Your case file</h3><p>Anyone with the same open data can check it.</p><div class="file">${c.file(ctx)}</div>
     <div class="row"><button class="btn quiet" id="copy" type="button">Copy case file</button></div></div>`;
   $("copy").onclick = async e => {

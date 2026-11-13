@@ -22,7 +22,7 @@ export default {
         let it;
         for (const days of [60, 365]) { try { it = await clearest(ctx.box, days); break; } catch {} }
         if (!it) throw new Error("It's been too cloudy there. Try another place.");
-        ctx.scene = day(it.id);
+        ctx.scene = day(it.id); ctx.item = it.id;
         // the old way's size, asked now so it's ready by the end; a failure shows as "numbers didn't load"
         ctx.size = api(`/api/size?${q({ item: it.id })}`);
         ctx.size.catch(() => {});
@@ -32,7 +32,7 @@ export default {
         return `<p>${ctx.full}, taken ${ctx.scene}.</p>${note("satellite")}`;
       } } }),
     () => ({ title: "Meet the switch", text: `<p>The switch on the map flips between the map and the picture. You'll use it to compare.</p>`,
-      flipTask: `Tap "Map" on the switch.` }),
+      flipTask: `Tap "Map" on the switch, then "From space".` }),
     () => ({ title: "Look around", text: `<p>Drag to move. Pinch or scroll to zoom.</p><p>One pixel is about a house. You'll spot fields and roads, but not cars.</p>${note("fastmaps")}` }),
     () => ({ title: "Then and now", text: `<p>You just saw your place from space. Here's how that went before maps could read just part of a file.</p>`, then: async ctx => {
       // a slow archive gets 10 s, then the beat says its numbers didn't load
@@ -54,10 +54,12 @@ export default {
           ["Tools", "Desktop map software and room on your disk", "This web page"],
           ["Price", "Before 2008, one Landsat picture cost $400 to $4,000", "Free"],
         ],
-        note: "thennow",
+        after: `<p class="recent"><b>Recent developments</b>Zarr stores huge stacks of data, like decades of daily weather, in small chunks a program can read one at a time. And some maps now read files straight from cloud storage in the browser, with no server in between.</p>`,
+        note: "thennow", notes: ["zarr", "direct"],
       };
     } }),
   ],
+  pics: c => [[`Your place, ${c.scene}`, c.item]],
   found: c => [`${c.full} from space, in a picture taken ${c.scene}${c.secs ? `, about ${c.secs} seconds after you asked` : ""}.`,
     "Free pictures of anywhere on Earth are one search away. The cases ahead use them to answer real questions."],
   file: c => `Place: ${c.full}\nPicture: Sentinel-2, taken ${c.scene}. Free and open.${c.read ? `\nRead: ${size(c.read)} of a ${size(c.whole)} scene.` : ""}`,

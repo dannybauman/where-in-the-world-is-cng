@@ -54,12 +54,13 @@ export default {
       } } }),
     ctx => ({ title: "Brief the rescue center", text: `<p>Which line do you hand the center?</p>`,
       pick: { options: [
-        { text: "The whole city is under water.", right: false, why: "You measured one box, not the whole city. Overclaiming costs trust." },
-        { text: `Radar shows about ${km(ctx.kb)} km² of north Porto Alegre under water on ${day(ctx.b.id)}, around the airport. In a normal year there is almost none. Teams on the ground will confirm street by street.`, right: true, why: "What you found, how you know, and what's still unsure." },
-        { text: "The rain has stopped, so the danger is over.", right: false, why: "Nothing you measured says that." },
+        { text: `Radar shows about ${km(ctx.kb)} km² of north Porto Alegre under water on ${day(ctx.b.id)}. The whole city is flooded, and every street needs a boat.`, right: false, why: "You measured one box, not the whole city. Overclaiming costs trust." },
+        { text: `Radar shows about ${km(ctx.kb)} km² of north Porto Alegre under water on ${day(ctx.b.id)}, around the airport. Before the flood there was almost none. Teams on the ground will confirm street by street.`, right: true, why: "What you found, how you know, and what's still unsure." },
+        { text: `Radar shows about ${km(ctx.kb)} km² of north Porto Alegre under water on ${day(ctx.b.id)}, around the airport. The water is falling, so the danger is over.`, right: false, why: "One radar pass can't tell you if the water is rising or falling." },
       ], then: async () => note("honest") } }),
   ],
+  pics: c => [["Camera picture", c.opt?.id], ["Radar before", c.a?.id], ["Radar during", c.b?.id]],
   found: c => [`About ${km(c.kb)} km² of north Porto Alegre was under water on ${day(c.b.id)}, under ${pct(c.cloud)} cloud.`,
     "When clouds hide a disaster, radar still sees it. Rescue teams can plan from it that same day."],
-  file: c => `Question: Which parts of north Porto Alegre were under water in the May 2024 flood?\nFinding: About ${km(c.kb)} km² of the box was under water, up from ${km(c.ka)} km² in a normal week (${pct(c.fb)} of the box, up from ${pct(c.fa)}).\nEvidence: Sentinel-1 radar from ${day(c.a.id)} and ${day(c.b.id)}. The camera's picture from ${day(c.opt.id)} was ${pct(c.cloud)} cloud over the box.\nLimits: one box and one radar pass. Smooth surfaces like runways can look like water. Radar can miss water under trees or between tall buildings.`,
+  file: c => `Question: Which parts of north Porto Alegre were under water in the May 2024 flood?\nFinding: About ${km(c.kb)} km² of the box was under water, up from ${km(c.ka)} km² before the flood (${pct(c.fb)} of the box, up from ${pct(c.fa)}).\nEvidence: Sentinel-1 radar from ${day(c.a.id)} and ${day(c.b.id)}. The camera's picture from ${day(c.opt.id)} was ${pct(c.cloud)} cloud over the box.\nLimits: one box and one radar pass. Smooth surfaces like runways can look like water. Radar can miss water under trees or between tall buildings.`,
 };

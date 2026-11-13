@@ -46,7 +46,7 @@ export default {
         hint: "Pick the one you trust most.",
         options: ctx.list.map((it, k) => ({ it, text: `Picture ${k + 1}, ${day(it.id)}`, right: it === ctx.good,
           reveal: cover(it),
-          why: it === ctx.good ? "No clouds, and it shows most of the lake." : it.cloud_cover >= 40 ? "Clouds hide the water. You can't measure what you can't see." : "A few clouds and their shadows hide bits of the lake. They would throw off the count." })),
+          why: it === ctx.good ? "The clearest view of the whole lake." : it.cloud_cover >= 40 ? "Clouds hide the water. You can't measure what you can't see." : "A few clouds and their shadows hide bits of the lake. They would throw off the count." })),
         preview: o => paint("a", o.it.id),
         then: async () => { ctx.b = ctx.good; await paint("b", ctx.good.id); return note("clouds"); },
       } }),
@@ -57,7 +57,7 @@ export default {
         ctx.a = a; ctx.c = c;
         await paint("a", a.id); await paint("b", ctx.b.id);
         flipDates(ctx); await frame(OVERTON);
-        return `<p>This is the lake's shallow north end, where a drop shows most. Flip between ${year(a)} and ${year(ctx.b)} with the switch on the map.</p>${note("compare")}`;
+        return `<p>This is the lake's shallow north end, where a drop shows most. Flip between ${year(a)} and ${year(ctx.b)} with the switch on the map. ${year(c)} joins when you measure.</p>${note("compare")}`;
       } } }),
     () => ({ title: "Your hunch?", text: `<p>Flip between 2020 and 2026 a few times. Compared to 2020, the lake is…</p>`,
       guess: { options: [{ key: "gone", text: "Almost gone" }, { key: "less", text: "Smaller, but far from gone" }, { key: "same", text: "About the same" }] } }),
@@ -80,14 +80,17 @@ export default {
         const lines = rows.map(r => `<li><b>${r.year}</b>: ${km(r.km2)} km² of water, official level ${ft(r.ft)}</li>`).join("");
         return `<ul>${lines}</ul><div class="say ${same ? "" : "wrong"}">${same ? `The 2 agree. Each year the water area and the level move the same way. From ${ctx.rows[0].year} to ${ctx.rows[2].year} the level fell ${ft(ctx.ftDrop)}.` : "The 2 don't line up. Don't publish until you know why."}</div>${note("groundtruth")}`;
       } } }),
-    ctx => ({ title: "Brief the public", text: `<p>Which line do you hand your editor?</p>`,
+    ctx => ({ title: "Brief your editor", text: `<p>Which line do you hand your editor?</p>`,
       pick: { options: [
-        { text: "Lake Mead is almost gone.", right: false, why: "The lake lost water but most of it is still there. Overclaiming costs trust." },
+        { text: `Satellite pictures show Lake Mead is almost gone. Its water area is ${ctx.drop}% smaller than in ${ctx.rows[0].year}, and the official level is down ${ft(ctx.ftDrop)}.`, right: false, why: `A ${ctx.drop}% drop is a lot, but most of the lake is still there. Overclaiming costs trust.` },
         { text: `Satellite pictures show the lake's water area is ${ctx.drop}% smaller than in ${ctx.rows[0].year}, and the official level is down ${ft(ctx.ftDrop)}. The lake is low, not gone.`, right: true, why: "What you found, how you know, and what's still unsure." },
-        { text: "The lake is the cleanest it has ever been.", right: false, why: "Nothing you measured is about water quality." },
+        { text: `Satellite pictures show the lake's water area is down ${ctx.drop}% since ${ctx.rows[0].year}. At this rate the lake will be empty within years.`, right: false, why: "You measured 3 dates. That can't tell you what comes next." },
       ], then: async () => note("honest") } }),
   ],
+  pics: c => [c.a, c.c, c.b].filter(Boolean).map(it => [year(it), it.id]),
+  ground: c => c.ftDrop ? "The official lake level, measured at Hoover Dam, moved the same way." : "",
+  also: "The US Bureau of Reclamation measures the lake level.",
   found: c => [`Lake Mead's water area is ${c.drop}% smaller than in ${c.rows[0].year}, and the official level is down ${ft(c.ftDrop)}.`,
     c.verdict === "gone" ? "The post holds up. The pictures and the official level agree." : "The post is wrong. The lake is low, not gone. A picture plus a measurement on the ground settles what a picture alone can't."],
-  file: c => `Claim: Lake Mead is almost gone.\nFinding: Not supported. The lake is low. Its water area in the box fell ${c.drop}% from ${year(c.a)} to ${year(c.b)} (${km(c.rows[0].km2)} to ${km(c.rows[2].km2)} km²), and the official level fell ${ft(c.ftDrop)}.\nEvidence: Sentinel-2 pictures from ${day(c.a.id)}, ${day(c.c.id)} and ${day(c.b.id)}. Official end-of-month levels from the US Bureau of Reclamation: ${c.rows.map(r => `${r.year} ${ft(level(r.it))}`).join(", ")}.\nLimits: one box over the main body of the lake, 3 days, and a water score that can miss muddy or shallow water. Areas are for the box, not the whole lake.`,
+  file: c => `Claim: Lake Mead is almost gone.\nFinding: Not supported. The lake is low. Its water area in the box fell ${c.drop}% from ${year(c.a)} to ${year(c.b)} (${km(c.rows[0].km2)} to ${km(c.rows[2].km2)} km²), and the official level fell ${ft(c.ftDrop)}.\nEvidence: Sentinel-2 pictures from ${day(c.a.id)}, ${day(c.c.id)} and ${day(c.b.id)}. Official end-of-month levels from the US Bureau of Reclamation: ${c.rows.map(r => `${r.year} ${ft(level(r.it))}`).join(", ")}.\nLimits: one box around the whole lake, 3 dates, and a water score that can miss muddy or shallow water.`,
 };
