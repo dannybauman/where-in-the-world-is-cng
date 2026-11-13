@@ -94,6 +94,30 @@ Order and status as of 2026-11-12.
 
 Use-case themes behind this, ranked (from Danny's DevSeed notes, 2026-11-12): forests and embeddings; flood and radar; ask a question, get a map; fire and recovery; why the data stays put.
 
+## Pass 2: one cohesive polish (planned 2026-11-12)
+
+Danny, 2026-11-12: "make it better ... better actual game content, onboarding, and story. better design, better UX, better gameplay, better polish, better smooth progression from easy/new to more challenging/replay-value, reduce complications and use simple concise language". Done as one designed pass in the slices below, each its own commit, not a run of patches.
+
+The calls (made 2026-11-12, Danny's "your call"):
+- **Story.** You run a small desk that answers questions with free pictures from space. Each case is one person's question (a neighbor, a reporter, a fire chief), opened in their words and closed with your answer to them. The cheeky cloud stays the only trickster. No chase plot, no borrowed characters.
+- **Onboarding.** The first screen is one action: "Type a place you know." That is First Look's first step, so the game starts by playing. Nothing locked shows until it is close: the path shows the next case, not a wall of locks.
+- **Progression.** The mystery places get 3 tiers. Easy: Manhattan, the Nile, Mount Fuji, Venice. Medium: Palm Jumeirah, the Grand Canyon, the Mississippi delta, Rondônia. Hard: the Richat Structure, Al Jawf, the Exuma Cays, the Afsluitdijk. A tier opens after 6 stars in the tier before it. Today's mystery comes from the highest open tier.
+- **Replay.** A daily streak on today's mystery, and 12 more places (4 per tier) picked with the same rules as the first 12.
+- **Gameplay.** Fewer clues used means a small bonus: solve on clue 1 with a 3-star guess and it shows "Sharp eye". A badge, not a new score.
+- **Cases.** The Forest case replaces The Vanishing Lake once INPE DETER gives a clearing. Until then, the Lake case stays.
+- **Language and design.** One copy sweep over every screen (one idea per sentence, buttons say what happens), then one design pass with the frontend-design checklist, checked at 390 px and 1280 px.
+
+Slices, in order (each about 15 minutes, each shown in Danny's window before the next):
+1. A fresh-eyes playthrough by a helper, start to finish, listing every friction point in plain words. It grounds the rest; the slices below change if it finds something bigger.
+2. Copy sweep.
+3. Onboarding: start by playing.
+4. Story frame: the asker's line at the start and end of each case.
+5. Mystery tiers and the daily streak.
+6. Sharp eye badge.
+7. 12 more places.
+8. Design and polish pass.
+9. Forest case (needs the DETER clearing).
+
 ## How it is built
 
 - Its own public repo, `dannybauman/where-in-the-world-is-cng` (MIT), installing Groundstation as a library pinned to a commit, so the game calls Groundstation's tools rather than copying them. Groundstation itself is not changed for the game. A Groundstation update reaches the game when the pin is moved on purpose and the game is tried.
