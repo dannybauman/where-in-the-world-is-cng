@@ -52,7 +52,7 @@ export default {
   id: "who", who: "Investigator", title: "Who Did It?", maxStars: 4,
   blurb: "Three disasters, three wrong guesses about what caused them. Read the mark each one left and name the real one.",
   steps: [
-    ctx => ({ title: "Scene 1: Mississippi, April 2020", text: `<p>Not every suspect is weather. You work for a disaster aid fund. In each scene, someone blames the wrong kind of event. You measure the mark it left and name the real one.</p><p>A local post says straight-line winds flattened the woods south of Laurel. The National Weather Service survey team needs to know where to walk.</p>`,
+    ctx => ({ title: "Scene 1: Mississippi, April 2020", text: `<p>You work for a disaster aid fund. In each scene, someone blames the wrong kind of event. You measure the mark it left and name the real one. Not every suspect is weather.</p><p>A local post says straight-line winds flattened the woods south of Laurel. The National Weather Service survey team needs to know where to walk.</p>`,
       go: { label: "Search before and after", run: async () => {
         await frame(T);
         const [a, b] = await Promise.all([find(T, "2020-04-05", T_IDS[0]), find(T, "2020-04-30", T_IDS[1])]);
@@ -77,14 +77,14 @@ export default {
         if (!ok.length) throw new Error("The band didn't show in the measurements. Try again.");
         ctx.avg = ok.reduce((x, y) => x + y, 0) / ok.length;
         const lines = ctx.w.map((w, k) => `<li>Cross-section ${k + 1}: ${w ? `${km1(w)} km wide` : "no clear band"}</li>`).join("");
-        return `<ul>${lines}</ul><p>Length: about ${Math.round(ctx.len)} km between the first and last.</p><div class="say">About ${km1(ctx.avg)} km wide at all 3 places, along at least ${Math.round(ctx.len)} km.</div>${note("mark")}`;
+        return `<ul>${lines}</ul><p>Length: about ${Math.round(ctx.len)} km between the first and last.</p><div class="say">Between ${km1(Math.min(...ok))} and ${km1(Math.max(...ok))} km wide, along at least ${Math.round(ctx.len)} km.</div>${note("mark")}`;
       } } }),
     ctx => ({ title: "Who did it?", text: `<p>You measured a mark about ${km1(ctx.avg)} km wide and at least ${Math.round(ctx.len)} km long. Which suspect leaves that mark?</p>`,
       pick: { options: [
         { text: "Tornado: a narrow, straight track, a few hundred meters to 2 km wide, many km long.", right: true, why: `Your own cross-sections were about ${km1(ctx.avg)} km wide and ran at least ${Math.round(ctx.len)} km. That is a tornado track. The National Weather Service survey later rated this one EF4.` },
-        { text: "Straight-line winds: damage spread wide, field after field, with no single track. At this resolution it shows only faintly.", right: false, why: `A band ${km1(ctx.avg)} km wide and at least ${Math.round(ctx.len)} km long is a track. Straight-line winds spread damage wide.` },
+        { text: "Straight-line winds: damage spread wide, field after field, with no single track.", right: false, why: `A band ${km1(ctx.avg)} km wide and at least ${Math.round(ctx.len)} km long is a track. Straight-line winds spread damage wide.` },
         { text: "Hurricane: damage tens of km wide, across whole regions.", right: false, why: `Your band is about ${km1(ctx.avg)} km wide, not tens of km.` },
-        { text: "Hail: a swath 5 to 15 km wide, mostly in crops. At this resolution it shows only faintly.", right: false, why: `Your band is about ${km1(ctx.avg)} km wide. A hail swath is 5 to 15 km.` },
+        { text: "Hail: a swath 5 to 15 km wide, mostly in crops.", right: false, why: `Your band is about ${km1(ctx.avg)} km wide. A hail swath is 5 to 15 km.` },
       ] } }),
     ctx => ({ title: "Scene 2: Dominica, September 2017", text: `<p>An early report says a flash flood tore down one valley of Dominica. An aid team has to choose: send everything to one valley, or spread out over the whole island.</p>`,
       go: { label: "Search before and after", run: async () => {
@@ -95,7 +95,7 @@ export default {
         flip(day(a.id), day(b.id));
         return `<p>Flip between ${day(a.id)} and ${day(b.id)}. Does the change sit in one valley, or everywhere?</p>`;
       } } }),
-    ctx => ({ title: "Measure the green in 4 parts of the island", text: `<p>Split the box into 4 parts. In each one, measure the share of the ground that is green forest, before and after.</p>`,
+    ctx => ({ title: "Measure the green in 4 parts of the island", text: `<p>Split the box into 4 parts. In each one, measure the share of the box that is green forest, before and after.</p>`,
       go: { label: "Measure the 4 parts", wait: "Measuring 8 places…", run: async () => {
         const r = await Promise.all(QUARTERS.map(([, q]) => Promise.all([stats(ctx.da.id, GREEN, q), stats(ctx.db.id, GREEN, q)])));
         ctx.q = r;
@@ -117,10 +117,10 @@ export default {
         ctx.m = [a, b];
         await paint("a", a.id); await paint("b", b.id);
         flip(day(a.id), day(b.id));
-        return `<p>Flip between ${day(a.id)} and ${day(b.id)}. Dark water spreads over the flat land around the lake.</p>`;
+        return `<p>Flip between ${day(a.id)} and ${day(b.id)}. Green, muddy water spreads over the flat land around the lake.</p>`;
       } } }),
-    () => ({ title: "Your hunch?", text: `<p>If this is a flash flood, by late November the water will be…</p>`,
-      guess: { options: [{ key: "gone", text: "Mostly gone" }, { key: "half", text: "About half gone" }, { key: "still", text: "Still mostly there" }] } }),
+    () => ({ title: "Your hunch?", text: `<p>The post says the water will be gone in days. How much of the flood water do you think is left in late November?</p>`,
+      guess: { options: [{ key: "gone", text: "Mostly gone" }, { key: "half", text: "About half left" }, { key: "still", text: "Still mostly there" }] } }),
     ctx => ({ title: "Search the next 3 months", text: `<p>Look at October, November and December too. Then measure the water on all 5 dates.</p>`,
       go: { label: "Measure all 5 dates", wait: "Searching 3 more months…", run: async () => {
         const rest = await Promise.all([["2022-10-08", 2], ["2022-11-22", 3], ["2022-12-27", 4]].map(([d, k]) => find(M, d, M_IDS[k])));
@@ -129,9 +129,11 @@ export default {
         const f = await Promise.all(ctx.m.map(it => stats(it.id, IS_WATER, M)));
         ctx.f = f;
         const rows = f.map((v, k) => ({ m: MONTHS[k], f: v }));
-        ctx.verdict = f[3] > 1.5 * f[0] ? "still" : f[3] <= 1.2 * f[0] ? "gone" : "half";
+        // share of the extra water at the September peak still there in November
+        ctx.left = (f[3] - f[0]) / (f[1] - f[0]);
+        ctx.verdict = ctx.left > 0.6 ? "still" : ctx.left < 0.25 ? "gone" : "half";
         const right = ctx.guess === ctx.verdict;
-        return `${waterBars(rows)}<div class="say ${right ? "" : "wrong"}">By late November, water covered ${pct(f[3])} of the box. In June it was ${pct(f[0])}. ${right ? "Your hunch was right." : "Not what you guessed, which is why we measure."}</div>${note("fastmaps")}`;
+        return `${waterBars(rows)}<div class="say ${right ? "" : "wrong"}">By late November, water covered ${pct(f[3])} of the box, against ${pct(f[0])} in June and ${pct(f[1])} at the peak. About ${pct(ctx.left)} of the flood water was still there. ${right ? "Your hunch was right." : "Not what you guessed, which is why we measure."}</div>${note("fastmaps")}`;
       } } }),
     ctx => ({ title: "Who did it?", text: `<p>The water peaked at ${pct(ctx.f[1])} of the box in September. It was still ${pct(ctx.f[3])} in November and ${pct(ctx.f[4])} in December. Which suspect leaves that mark?</p>`,
       pick: { options: [
@@ -143,8 +145,8 @@ export default {
   ],
   pics: c => [["Mississippi before", c.ta?.id], ["Mississippi after", c.tb?.id], ["Dominica before", c.da?.id], ["Dominica after", c.db?.id], ["Pakistan June", c.m?.[0]?.id], ["Pakistan September", c.m?.[1]?.id], ["Pakistan November", c.m?.[3]?.id]],
   ground: () => "The National Weather Service surveyed the Mississippi track on foot and rated it EF4.",
-  also: "The National Weather Service and Pakistan's flood agencies reported these events.",
+  also: "The National Weather Service, the National Hurricane Center and Pakistan's flood agencies reported these events.",
   found: c => [`Mississippi was a tornado: a band about ${km1(c.avg)} km wide and at least ${Math.round(c.len)} km long. Dominica was a hurricane: every part of the island lost at least ${c.loss}% of its green. Sindh was a monsoon flood: water covered ${pct(c.f[3])} of the box in November, against ${pct(c.f[0])} in June.`,
     "The mark tells you the cause. Free open data measured it, and nobody had to visit."],
-  file: c => `Claim: Three posts blamed the wrong event. Mississippi, April 2020: straight-line winds. Dominica, September 2017: a flash flood down one valley. Sindh, 2022: a dam break and a flash flood that drains in days.\nFinding: Mississippi was a tornado, a band about ${km1(c.avg)} km wide (${c.w.map(km1).join(", ")} km at 3 places) along at least ${Math.round(c.len)} km. Dominica was Hurricane Maria, with green forest at ${c.q.map(([a, b], k) => `${QUARTERS[k][0]} ${pct(a)} to ${pct(b)}`).join(", ")}. Sindh was a monsoon flood, with water over ${c.f.map((v, k) => `${pct(v)} of the box in ${MONTHS[k]}`).join(", ")}.\nEvidence: Sentinel-2 pictures from ${day(c.ta.id)} and ${day(c.tb.id)}, ${day(c.da.id)} and ${day(c.db.id)}, and ${c.m.map(i => day(i.id)).join(", ")}. A plant health score ${BURN} and a water score ${WATER}. The National Weather Service surveyed the Mississippi track on foot and rated it EF4.\nLimits: one box per scene and only a few dates. Spring green-up happens between the 2 Mississippi dates, so part of the plant health drop is seasonal. The Dominica pictures have clouds (about 18% in both, which does not explain the drop). A water score can miss muddy water. The game cannot check these events against the live event feed, because that feed lists only open events.`,
+  file: c => `Claim: Three posts blamed the wrong event. Mississippi, April 2020: straight-line winds. Dominica, September 2017: a flash flood down one valley. Sindh, 2022: a dam break and a flash flood that drains in days.\nFinding: Mississippi was a tornado, a band about ${km1(c.avg)} km wide (${c.w.map(km1).join(", ")} km at 3 places) along at least ${Math.round(c.len)} km. Dominica was Hurricane Maria, with green forest at ${c.q.map(([a, b], k) => `${QUARTERS[k][0]} ${pct(a)} to ${pct(b)}`).join(", ")}. Sindh was a monsoon flood, with water over ${c.f.map((v, k) => `${pct(v)} of the box in ${MONTHS[k]}`).join(", ")}.\nEvidence: Sentinel-2 pictures from ${day(c.ta.id)} and ${day(c.tb.id)}, ${day(c.da.id)} and ${day(c.db.id)}, and ${c.m.map(i => day(i.id)).join(", ")}. A plant health score ${BURN} and a water score ${WATER}. The National Weather Service surveyed the Mississippi track on foot and rated it EF4.\nLimits: one box per scene and only a few dates. Spring green-up between the 2 Mississippi dates raises plant health, so the drop on the track, if anything, reads smaller than it was. The Dominica pictures have clouds (about 18% in both, which does not explain the drop). A water score can miss muddy water. The game cannot check these events against the live event feed, because that feed lists only open events.`,
 };
