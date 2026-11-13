@@ -21,15 +21,16 @@ export default {
   id: "flood", who: "Responder", title: "Flood Under the Clouds", maxStars: 3,
   blurb: "Record rain floods southern Brazil. Clouds hide it from the camera. See it with radar.",
   steps: [
-    ctx => ({ title: "The rain won't stop", text: `<p>May 2024. Record rain floods Rio Grande do Sul, Brazil. Porto Alegre's airport and northern neighborhoods are going under.</p><p>You plan rescues: which streets are under water? Start with this week's picture.</p>`,
-      go: { label: "Get this week's picture", run: async () => {
+    ctx => ({ title: "The rain won't stop", text: `<p>May 2024. Record rain floods Rio Grande do Sul, Brazil. Porto Alegre's airport and northern neighborhoods went under.</p><p>It's May 11. You plan rescues: which streets are still under water? Start with today's picture.</p>`,
+      go: { label: "Get today's picture", run: async () => {
         await frame(FLOOD);
-        // the week's passes all cover the box; show the cloudiest (flood day) and tell the clearest
+        // cloud over this box, from the picture's own cloud mask; a scene's cloud_cover is for the whole tile and can say 39% when the box is clear
         const all = await best(FLOOD, "2024-05-05", "2024-05-12", 100);
-        ctx.opt = all.reduce((x, y) => (y.cloud_cover > x.cloud_cover ? y : x));
-        ctx.least = Math.min(...all.map(i => i.cloud_cover));
+        const byDate = [...all].sort((x, y) => x.datetime.localeCompare(y.datetime));
+        ctx.opt = byDate.at(-1);
+        const [now, last] = await Promise.all([ctx.opt, byDate[0]].map(it => stats(it.id, "scl>=8", FLOOD)));
         await paint("b", ctx.opt.id); show("b");
-        return `<p>${n(ctx.opt.cloud_cover, 0)}% cloud. Even the clearest picture this week is ${n(ctx.least, 0)}% cloud.</p>${note("clouds")}`;
+        return `<p>${pct(now)} cloud over your area. The last clear look was ${day(byDate[0].id)} (${pct(last)} cloud). Since then, clouds.</p>${note("clouds")}`;
       } } }),
     () => ({ title: "How do you see under the clouds?", text: `<p>People are waiting on roofs. You need the answer now.</p>`,
       pick: { options: [
