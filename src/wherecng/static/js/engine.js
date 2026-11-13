@@ -17,7 +17,9 @@ let run = null;
 export const leave = () => { run = null; };
 
 function render() {
-  const { c, i, ctx } = run, s = c.steps[i](ctx);
+  // a step that returns nothing doesn't apply this run (no fire to look at) and is skipped
+  let s; while (!(s = run.c.steps[run.i](run.ctx))) run.i++;
+  const { c, i, ctx } = run;
   view.innerHTML = `<div class="top"><span class="who">${c.who}: ${c.title}</span></div>
     <div class="dots" aria-label="Step ${i + 1} of ${c.steps.length}">${c.steps.map((_, k) => `<i class="${k < i ? "done" : ""}"></i>`).join("")}</div>
     <div class="step"><h2>${s.title}</h2>${s.text || ""}<div id="body"></div><div class="row" id="ctl"></div></div>`;

@@ -89,7 +89,7 @@ Order and status as of 2026-11-12.
 | 1 | Forest case (working title) | Detective | was a forest cleared for farms after 2021: the player taps forest and farm spots, the game learns from them with embeddings and maps 2 years | next; needs a probed place |
 | 2 | After the Fire | Responder | burn index before and after; then what grew back | built; "grew back" to add |
 | 3 | Flood through clouds | Responder | radar sees through the cloud | built (Flood Under the Clouds, 6 steps, 3 stars); Sentinel-1 radar from Planetary Computer over north Porto Alegre, May 2024: about 6 km² of a 43 km² box under water vs under 1 km² in Dec 2021 |
-| 4 | Right Now, Near You | Reporter | live feeds plus the latest clear picture; to become "ask a question, get a map" | built; place, feeds and picture in one step; reshape later |
+| 4 | Right Now, Near You | Reporter | live feeds, then the nearest fire a satellite can see: fly there, before and after, burn score, tap the scar | rebuilt 2026-11-12 (slice 5): 5 steps, 2 stars; wildfires from NASA EONET first, planned burns as fallback; a fire counts only with a clear picture before it and one after with under 20% cloud over its box; quakes and storms are listed, not looked at |
 | - | The Vanishing Lake | Detective | water index, honest debunk | built, opens second for now; to be replaced by the forest case |
 
 Use-case themes behind this, ranked (from Danny's DevSeed notes, 2026-11-12): forests and embeddings; flood and radar; ask a question, get a map; fire and recovery; why the data stays put.
@@ -112,7 +112,7 @@ Slices, in order (each about 15 minutes, each shown in Danny's window before the
 2. Deepen After the Fire: add "what grew back" (a later date, the same index, the change measured).
 3. Rebuild The Vanishing Lake around a number that holds (playthrough: the average water score over a mostly-desert box gave -0.13 vs -0.16 and a shaky verdict, and 2025 vs 2026 look the same). Measure the water's area inside the lake, over years far enough apart to see, and show the published lake level beside it. Or replace it with the Forest case once INPE DETER gives a clearing.
 4. A new case from the ranked themes: flood through clouds with radar. Done 2026-11-12.
-5. Give Right Now, Near You real content (playthrough: a quiet place gives a lookup and a quiz, no picture or layer). When nothing is near, go to the nearest live event and look at it.
+5. Give Right Now, Near You real content (playthrough: a quiet place gives a lookup and a quiz, no picture or layer). When nothing is near, go to the nearest live event and look at it. Done 2026-11-12: always goes to the nearest fire a picture can show (Portland found the Bras fire, Montana, 648 km; tap read 0.33 to 0.18).
 6. Copy sweep and story lines across all cases, including a closing "what you found, what it means" line on every case, a visible rule for stars with one retry, and plain words for STAC, COG and TiTiler.
 7. Design and polish pass, including the phone map (taller, controls off the area being judged), cases above the mystery card on a phone, and a spinner on every wait over a second.
 
